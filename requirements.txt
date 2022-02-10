@@ -1,0 +1,6 @@
+whitenoise=5.1.0
+pandas=1.4.0
+plotly=5.6.0
+plotly_express=0.4.1
+dash=2.1.0
+dash_bio=1.0.1
