@@ -122,7 +122,7 @@ input[type="checkbox"]:checked:after {
 .aln-slider-RE .rc-slider-mark {font-size: 1.6vh;}
 
 .labs {
-  color: #F3E0BE;
+  color: black;
   text-align: left;
   font-size: 18px;
 }
