@@ -9,11 +9,17 @@ import dash_bio as dashbio
 from app import app
 
 ### Default dataset
+  ## must be in github repo in order for the path to work properly
+  ## eventually this will be replaced with load
+  ## these data or other data can be used as example
 path = os.getcwd()+'/static/data/volcano/'
 df = pd.read_csv(path+"volcano.csv")
 uniprot_ids = df.GENE.tolist()
 
 ### BASIC CSS
+  ## dictionary: key:value
+  ## reference: https://www.w3schools.com/cssref/default.asp
+  ## variables are user defined. 
 drops = {'margin': '0 0 0.4vh 2vw', 'width': '13vw', 'display': 'inline-block', 'font-size': '2vh',
          'font-family': 'Ubuntu, sans-serif', 'color': 'dimgrey'}
 btn_basic = {'margin': '0 0.5vw 0 0', 'padding': '0.2vh 0', 'font-size': '6vh', 'height': '3vh', 'width': '7vw'}
@@ -29,21 +35,32 @@ settings_close = {'margin': '0 0.5vw 0 0', 'border': '0px', 'color': '#63533c', 
                   'height':'2vw', 'width':'2vw', 'position':'absolute', 'top':'0', 'right':'0', 'z-index':'105'}
 
 ### Set comprehensive options
+  ## define the layout 
+  ## add widgets
+
+  ## Buttons
+#set_opts0 = html.Div(['opts0 - inputs loading options (now default data only)'], id='set_opts0', style={'display':'none', 'z-index':'110'})
 set_opts1 = html.Div(['opts1 - inputs loading options (now default data only)'], id='set_opts1', style={'display':'none', 'z-index':'110'})
 set_opts2 = html.Div([
     html.Div([
-        html.Div([
-            html.Label('Some options 1', className="labs"),
-            dcc.Dropdown(id='variable_1', placeholder="Select option", clearable=False, className="drops",
-                options=[{'label': i, 'value': i} for i in uniprot_ids], value=uniprot_ids[0])], className="drops1",),
-        html.Div([
+	## widgets in Button 2
+	## https://github.com/ISUgenomics/interactiveGraphing -- dash core components dcc
+# widget1
+#        html.Div([
+#            html.Label('Some options 1', className="labs"),
+#            dcc.Dropdown(id='variable_1', placeholder="Select option", clearable=False, className="drops",
+#                options=["black":"#000000"], value="#000000")], className="drops1",),
+# widget2
+        html.Div([ 
             html.Label('Select point size', className="labs labs2"),
-            dcc.Input(id='variable_2', type='number', min=1, step=1, max=30, value=8)], className="drops1",),
-        html.Div([
+            dcc.Input(id='variable_2', type='number', min=1, step=1, max=30, value=11)], className="drops1",),
+# widget3
+        html.Div([ 
             html.Label('Select Genome Wide line', className="labs labs2"),
             dcc.Input(id='variable_3', type='number', min=0, step=0.1, max=5, value=2.5)], className="drops1",),
     ], style={'display': 'inline-block'}),
-    html.Div([
+# widget4
+    html.Div([ 
         html.Label('Select Effect Size range', className="labs labs2"),
         dcc.RangeSlider(
             id='volcano-input',
@@ -65,6 +82,7 @@ layout = html.Div([
 
 
     html.Div([
+#        html.Button('⚙', id='opts0', className='hovertext', style={**btn_basic, **btn_style, **btn_opts}, title='display settings'),
         html.Button('⚙', id='opts1', className='hovertext', style={**btn_basic, **btn_style, **btn_opts}, title='display settings'),
         html.Button('✾', id='opts2', style={**btn_basic, **btn_style, **btn_opts},
                     title='see objects and interactions'),
@@ -76,8 +94,9 @@ layout = html.Div([
             html.Button('×', id='close', style={**btn_style, **settings_close}, title='close options window'),
         ], id='settings-dir', style={**settings_style, 'left': '3.5vw', 'min-width': '45vw'}),
     ], style={'width': '4vw', 'position': 'absolute', 'left': '0', 'z-index': '100', 'marginLeft':'0.5vw'}),
-
+# load plot
     html.Div([
+# TODO: Add other types to plot circle square, triangle etc
         dcc.Loading(id='loading-volcano', children=[html.Div(dcc.Graph(id='graph-volcano', className="graph",
             config={'toImageButtonOptions': {'format':'png', 'width':1400, 'height':800, 'scale':1.5}, 'responsive': True,},))], type='circle'),
     ], className="graph-parent", style={'width':'94vw', 'marginLeft':'4vw'}),
