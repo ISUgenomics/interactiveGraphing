@@ -121,8 +121,15 @@ input[type="checkbox"]:checked:after {
 .aln-slider-ID .rc-slider-mark {font-size: 1.6vh;}
 .aln-slider-RE .rc-slider-mark {font-size: 1.6vh;}
 
+.main_labs {
+  color: #006699;
+  text-align: left;
+  font-size: 22px;
+  margin-bottom: 0.5vh;
+  font-weight: 600;
+}
 .labs {
-  color: black;
+  color: gray;
   text-align: left;
   font-size: 18px;
 }

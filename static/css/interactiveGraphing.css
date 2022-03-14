@@ -144,105 +144,6 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
 }
 
 /*----------
-  RIGHT NAVBAR
-----------*/
-.fixed-side-navbar {
-  position: fixed;
-  top: 43%;
-  right: 0;
-  z-index: 99999;
-  margin-top: -100px;
-  text-align: right;
-  padding: 30px 0;
-  -webkit-transition: all .3s;
-  transition: all .3s;
-}
-.fixed-side-navbar:hover {
-  background: transparent;
-}
-
-.fixed-side-navbar:hover .nav > li > a > span {
-  color: rgba(0, 0, 0, 0.9);
-  display: block;
-  background-color: #006699;
-  text-align: center;
-  text-transform: uppercase;
-  font-size: 12px;
-  padding: 2px 12px;
-  border-radius: 15px;
-}
-.fixed-side-navbar .nav > li a.active {
-  background-color: transparent;
-  color: black;
-}
-.fixed-side-navbar .nav > li a.active:after {
-  -webkit-transform: scale(0.9);
-          transform: scale(0.9);
-  border: 5px solid #FF7E00;
-}
-.fixed-side-navbar .nav > li a.active:before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 17px;
-  margin-top: -8px;
-  width: 16px;
-  height: 16px;
-  background: transparent;
-  border: 2px solid #006699;
-  border-radius: 10px;
-}
-.nav>li {
-  position: relative;
-  display: block;
-}
-.fixed-side-navbar .nav > li a {
-  color: #006699;
-  min-height: 32px;
-  background: transparent;
-  padding: 5px 45px 5px 25px;
-  border-right: none;
-}
-.fixed-side-navbar .nav > li a span {
-  display: none;
-  -webkit-transition: all .2s;
-  transition: all .2s;
-  font-weight: 530;
-}
-.fixed-side-navbar .nav > li a:after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 20px;
-  margin-top: -5px;
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
-  background: #006699;
-  -webkit-transition: all .3s;
-  transition: all .3s;
-  -webkit-transform: scale(0.6);
-          transform: scale(0.6);
-}
-.fixed-side-navbar .nav > li a:hover {
-  background-color: transparent;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  border-color: black;
-  boder-right: 0;
-}
-.fixed-side-navbar .nav > li a:hover > span {
-  color: black;
-  display: block;
-  font-weight: 550;
-  background-color: #FF7E00;
-}
-.fadeInRight {
-  -webkit-animation-name: fadeInRight;
-          animation-name: fadeInRight;
-}
-
-/*----------
   OTHER COMMON COMPONENTS
 ----------*/
 .content {
@@ -569,17 +470,17 @@ footer em {
 
 .plotly-app {
   width: 100%;
-  height: 90vh;
+/*  height: 90vh;*/
 }
-#app.container {
+/*#app.container {
   max-height: 90vh;
 }
 #app-m.container {
   max-height: 70vh;
-}
+}*/
 
 /*MEDIA DIVICES - PLOTLY APPS*/
-@media screen and (max-height: 399px) {
+/*@media screen and (max-height: 399px) {
   .plotly-app {
     width: 181%;
     height: 155vh;
@@ -587,7 +488,6 @@ footer em {
     transform-origin: left top;
   }
   .precontainer {margin-left: 2.7vw; zoom: 0.7;}
-/*  .fixed-side-navbar {background: linear-gradient(0.25turn, rgba(7,24,33,0), rgba(7,24,33,0.6), rgba(7,24,33,0.8), rgba(7,24,33,1));}*/
   .fixed-side-navbar:hover {background: linear-gradient(0.25turn, rgba(7,24,33,0), rgba(7,24,33,0), rgba(7,24,33,0), rgba(7,24,33,0));}
 }
 
@@ -601,10 +501,10 @@ footer em {
   .precontainer {margin-left: 2.7vw; zoom: 0.8;}
   .fixed-side-navbar {background: linear-gradient(0.25turn, rgba(7,24,33,0), rgba(7,24,33,0), rgba(7,24,33,0), rgba(7,24,33,0));}
   .fixed-side-navbar:hover {background: linear-gradient(0.25turn, rgba(7,24,33,0), rgba(7,24,33,0), rgba(7,24,33,0), rgba(7,24,33,0));}
-}
+}*/
 
 /*MEDIA DIVICES - HTML TABS*/
-@media screen and (max-width: 799px) {
+/*@media screen and (max-width: 799px) {
   #menu {
     transform: none;
     height: 50px;
@@ -633,12 +533,12 @@ footer em {
   #home span {
     font-size: 6vh;
   }
-}
+}*/
 
 
 /* LIGHT BOX [#analysis] */
 
-body:after {
+/*body:after {
   content: url(../img/navi/close.png) url(../img/navi/loading.gif) url(../img/navi/prev.png) url(../img/navi/next.png);
   display: none;
 }
@@ -817,4 +717,4 @@ body.lb-disable-scrolling {
   cursor: pointer;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
   opacity: 1;
-}
+}*/
