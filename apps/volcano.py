@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 import pandas as pd
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_bio as dashbio
 
 from app import app
@@ -23,17 +24,18 @@ uniprot_ids = df.GENE.tolist()
 
 drops = {'margin': '0 0 0.4vh 2vw', 'width': '13vw', 'display': 'inline-block', 'font-size': '2vh',
          'font-family': 'Ubuntu, sans-serif', 'color': 'dimgrey'}
-btn_basic = {'margin': '0 0.5vw 0 0', 'font-size': '6vh', 'height': '3vh', 'width': '7vw', 'text-align': 'center', 'padding':'0'}
+btn_basic = {'margin': '0 0.5vw 0 0', 'font-size': '3vh', 'min-height':'25px', 'max-height':'56px', 'min-width':'25px', 'max-width':'56px', 'text-align': 'center', 'padding':'0'}
 btn_style = {'background-color': '#eeece7', 'color': '#63533c'}
 btn_selected_style = {'borderBottom': '3px solid #4682B4', 'borderTop': '0px solid #4682B4',
                       'background-color': '#95C8D8', 'color': 'black'}
 btn_disabled_style = {'background-color': '#F8F9F9', 'color': '#95A5A6'}
 btn_opts = {'height': '3vw', 'width': '3vw', 'border': '1px', 'margin-bottom': '0.45vw', 'font-size': '3vh'}
-settings_style = {'width': 'fit-content', 'height': 'auto', 'display': 'block', 'background': '#eeece7', 'opacity': '0.95',
+settings_style = {'width': '23vw', 'height': 'auto', 'display': 'block', 'background': '#eeece7', 'opacity': '1',
                   'border-radius': '5px 5px 5px 5px', 'position': 'absolute', 'top': '8vh', 'left': '0.5vw', 'z-index': '101',
                   'padding': '1vh 1vw 1vh 1vw', 'marginLeft':'0.5vw'}
-settings_close = {'margin': '0 0.5vw 0 0', 'border': '0px', 'color': '#63533c', 'font-size': '3vh', 'vertical-align': 'top',
-                  'height':'2vw', 'width':'2vw', 'position':'absolute', 'top':'0', 'right':'0', 'z-index':'105'}
+settings_close = {'margin': '0', 'border': '0px', 'color': '#63533c', 'font-size': '24px', 'vertical-align': 'top',
+                  'min-height':'25px', 'max-height':'56px', 'min-width':'25px', 'max-width':'56px',
+                  'position':'absolute', 'top':'0', 'right':'0', 'z-index':'105'}
 
 #### SET OPTIONS SECTION (left panel)
 # -- HTML content for options displayed on-click for a given button
@@ -46,15 +48,19 @@ set_opts1 = html.Div([
     html.Label('Load inputs', className="main_labs"),
     html.Div([
         html.Label('Load example dataset', className="labs"),
-        dcc.Checklist(id='default-data', options=['use default data'], value=["use default data"], style={'font-size':'2vh'})], className="drops1",),
+        dcc.Checklist(id='default-data', options=[{'label': 'use default data', 'value': '0', 'disabled': False}], value=['0'], style={'font-size':'2vh'})], className="drops1",),
     html.Div([
         html.Label('Load custom input data', className="labs"),
+        dcc.Input(id="user-files", value='', type='hidden', style={'height':'0', 'width':'0'}),
         dcc.Upload(id='upload-data',
                    children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
                    style={'width': '100%', 'height': '120px', 'lineHeight': '120px', 'font-size': '2.5vh',
                           'margin': '2px 0.85vw 1.5vh 0', 'borderWidth': '2px', 'border-color': '#006699',
                           'borderStyle': 'dashed', 'borderRadius': '5px', 'textAlign': 'center',},
                    multiple=True)], className="drops1",),	# Allow multiple files to be uploaded
+    html.Div([
+        html.Label('Select dataset(s) for plotting', className="labs"),
+        dcc.Checklist(id='select-data', options=[], value=[], style={'font-size':'2vh'})], className="drops1",),
 
 ], id='set_opts1', style={'display':'none', 'z-index':'110'})
 
@@ -90,12 +96,73 @@ set_opts2 = html.Div([
 set_opts3 = html.Div([
     html.Label('Adjust graph descriptions', className="main_labs"),
     html.Div([
-        html.Label('Enter chart title', className="labs"),
-        dcc.Input(id="input-title", type="text", placeholder="Customize the title", style={'width':'100%', 'margin': '2px 0.85vw 1.5vh 0',}),], className="drops1",),
+        html.Label('Enter chart title �', title="Type custom title and press enter.\nTo introduce a multi-line title, split the lines using the <br> syntax.", className="labs"),
+        dcc.Input(id="chart-title", type="text", placeholder="Customize the title", value="Example Volcano Plot", debounce=True, style={'width':'100%', 'margin': '2px 0.85vw 0 0',}),], className="drops1",),
     html.Div([
-        html.Label('Enter chart title font size', className="labs"),
-        dcc.Input(id="title-size", type="number", min=8, max=30, step=1, value=20, style={'width':'20%', 'margin': '2px 0.85vw 1.5vh 0',}),], className="drops1",),
+        html.Label('Title size', className="labs"),
+        dcc.Input(id="title-size", type="number", min=1, step=1, value=30, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops1", style={'width':'5vw'}),
+    html.Div([
+        html.Label('Title color �', title="Enter color value and press enter.\nAvailable options include: \n-common name, e.g., black\n-hex, e.g., #000000\n-rgb, e.g., rgb(0, 0, 0)\n-hsl, e.g., hsl(0, 100%, 0%) ", className="labs"),
+        dcc.Input(id="title-color", type="text", placeholder="#000000", value="black", debounce=True, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'6.5vw'}),
+    html.Div([
+        html.Label('Title X �', title="The title will be centered horizontally on the entered value. Allowed range from 0 to 1 in 0.01 increments.", className="labs"),
+        dcc.Input(id="title-x", type="number", min=0, max=1, step=0.01, value=0.6, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+    html.Div([
+        html.Label('Title Y �', title="The title will be centered vertically on the entered value. Allowed range from 0 to 1 in 0.01 increments.", className="labs"),
+        dcc.Input(id="title-y", type="number", min=0, max=1, step=0.01, value=1, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+
+    html.Hr([], style={'margin':'1.5vh 0'}),
+
+    html.Div([
+        html.Label('X-axis Label: title �', title="Type custom label for X-axis and press enter.\nTo introduce a multi-line title, split the lines using the <br> syntax.", className="labs"),
+        dcc.Input(id="xaxis-title", type="text", placeholder="Customize the title", value="Effect size", debounce=True, style={'width':'100%', 'margin': '2px 0.85vw 0 0',}),], className="drops1", style={'width':'50%', 'margin-right':'0.5vw'}),
+    html.Div([
+        html.Label('- size', className="labs"),
+        dcc.Input(id="xaxis-size", type="number", min=1, step=1, value=30, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+    html.Div([
+        html.Label('- color �', title="Enter color value of X-label and press enter.\nAvailable options include: \n-common name, e.g., black\n-hex, e.g., #000000\n-rgb, e.g., rgb(0, 0, 0)\n-hsl, e.g., hsl(0, 100%, 0%) ", className="labs"),
+        dcc.Input(id="xaxis-color", type="text", placeholder="#000000", value="black", debounce=True, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+
+    html.Div([
+        html.Label('Tick size', className="labs"),
+        dcc.Input(id="xtick-size", type="number", min=1, step=1, value=20, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops1", style={'width':'5vw'}),
+    html.Div([
+        html.Label('- color �', title="Enter color value and press enter.\nAvailable options include: \n-common name, e.g., black\n-hex, e.g., #000000\n-rgb, e.g., rgb(0, 0, 0)\n-hsl, e.g., hsl(0, 100%, 0%) ", className="labs"),
+        dcc.Input(id="xtick-color", type="text", placeholder="#000000", value="black", debounce=True, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'6.5vw'}),
+    html.Div([
+        html.Label('- width �', title="Sets the tick width (in px). Type number greater than or equal to 0, default = 1.", className="labs"),
+        dcc.Input(id="xtick-width", type="number", min=0, step=1, value=1, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+    html.Div([
+        html.Label('- angle �', title="Sets the angle of the tick labels with respect to the horizontal, e.g., a value of -90 draws the tick labels vertically.", className="labs"),
+        dcc.Input(id="xtick-angle", type="number", min=-359, max=359, step=1, value=0, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+
+    html.Hr([], style={'margin':'1.5vh 0'}),
+
+    html.Div([
+        html.Label('Y-axis Label: title �', title="Type custom label for Y-axis and press enter.\nTo introduce a multi-line title, split the lines using the <br> syntax.", className="labs"),
+        dcc.Input(id="yaxis-title", type="text", placeholder="Customize the title", value="-log10(p)", debounce=True, style={'width':'100%', 'margin': '2px 0.85vw 0 0',}),], className="drops1", style={'width':'50%', 'margin-right':'0.5vw'}),
+    html.Div([
+        html.Label('- size', className="labs"),
+        dcc.Input(id="yaxis-size", type="number", min=1, step=1, value=30, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+    html.Div([
+        html.Label('- color �', title="Enter color value of Y-label and press enter.\nAvailable options include: \n-common name, e.g., black\n-hex, e.g., #000000\n-rgb, e.g., rgb(0, 0, 0)\n-hsl, e.g., hsl(0, 100%, 0%) ", className="labs"),
+        dcc.Input(id="yaxis-color", type="text", placeholder="#000000", value="black", debounce=True, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+
+    html.Div([
+        html.Label('Tick size', className="labs"),
+        dcc.Input(id="ytick-size", type="number", min=1, step=1, value=20, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops1", style={'width':'5vw'}),
+    html.Div([
+        html.Label('- color �', title="Enter color value and press enter.\nAvailable options include: \n-common name, e.g., black\n-hex, e.g., #000000\n-rgb, e.g., rgb(0, 0, 0)\n-hsl, e.g., hsl(0, 100%, 0%) ", className="labs"),
+        dcc.Input(id="ytick-color", type="text", placeholder="#000000", value="black", debounce=True, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'6.5vw'}),
+    html.Div([
+        html.Label('- width �', title="Sets the tick width (in px). Type number greater than or equal to 0, default = 1.", className="labs"),
+        dcc.Input(id="ytick-width", type="number", min=0, step=1, value=1, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+    html.Div([
+        html.Label('- angle �', title="Sets the angle of the tick labels with respect to the vertical, e.g., a value of -90 draws the tick labels horizontally.", className="labs"),
+        dcc.Input(id="ytick-angle", type="number", min=-359, max=359, step=1, value=0, style={'width':'90%', 'margin': '2px 0.85vw 0 0',}),], className="drops2", style={'width':'5vw'}),
+
 ], id='set_opts3', style={'display':'none', 'z-index':'110'})
+
 
 # widgets displayed via Button 4
 set_opts4 = html.Div([
@@ -121,13 +188,12 @@ layout = html.Div([
                     title='description settings'),
             html.Button('⤋', id='opts4', style={**btn_basic, **btn_style, **btn_opts}, title='download settings'),
         ], ),
-        #style={ 'height': '100%', 'position': 'absolute', 'top': '1.5vh'}
         # a container holding options for a agiven button - visible via button on-click
         html.Div([set_opts1, set_opts2, set_opts3, set_opts4,
             html.Div(id='settings', style={'display':'block', 'z-index':'110'}),
             html.Button('×', id='close', style={**btn_style, **settings_close}, title='close options window'),
-        ], id='settings-dir', style={**settings_style, 'width': '23vw'}),
-    ], id='options', style={'display':'inline-block', 'height':'100vh', 'background-color':'#006699', 'position':'absolute', 'top':'0', 'margin':'0', 'padding':'1vw'}),		# id and style of "options" parent container
+        ], id='settings-dir', style=settings_style),
+    ], id='options', style={'display':'inline-block', 'height':'100vh', 'background-color':'#006699', 'position':'absolute', 'top':'0', 'margin':'0', 'padding':'1vh 1vw'}),		# id and style of "options" parent container
 # -- graph container (right panel in the layout) - here we only declare the graph container and dcc.Graph component
     html.Div([
         dcc.Loading(id='loading-volcano', children=[html.Div(dcc.Graph(id='graph-volcano', className="graph",
@@ -183,11 +249,55 @@ app.clientside_callback(
 
 #### PLOTLY CALLBACKS SECTION: python functions that manages changes on the interactive graph
 
+# The function returns updated dictionary of filename:file_content for all user-loaded files
+@app.callback(Output('user-files', 'value'),
+              [Input('upload-data', 'filename'), Input('upload-data', 'contents')],
+              State('user-files', 'value'), prevent_initial_call = True)
+def plot_volcano(names, contents, files):
+    if names is not None:
+        if files == '':
+            files = {i:contents[num] for num,i in enumerate(names)}
+        else:
+            files = json.loads(files)
+            for num,i in enumerate(names):
+                files[i] = contents[num]
+        return json.dumps(files)
+
+
+# The function updates a radio-button list of user-loaded files that can be used for plotting
+@app.callback(Output('select-data', 'options'),
+              Input('user-files', 'value'), prevent_initial_call = True)
+def plot_volcano(files):
+    if files != '':
+        return list(json.loads(files).keys())
+
+
+# The function switches off the default dataset once the radio-button with user-provided data is selected
+@app.callback([Output('default-data', 'value'), Output('default-data', 'options'), Output('default-data', 'style')],
+              Input('select-data', 'value'), State('default-data', 'style'), prevent_initial_call = True)
+def plot_volcano(selected_files, style):
+    if selected_files is not None:
+        if len(selected_files) > 0:
+            return [[], [{'label': 'use default data', 'value': '0', 'disabled': True}], {**style, 'color':'gray'}]
+        else:
+            return [['0'], [{'label': 'use default data', 'value': '0', 'disabled': False}], {**style, 'color':'black'}]
+
+
+# The function draws the final volcano plot
 @app.callback(Output('graph-volcano', 'figure'),
               [Input('variable_1', 'value'), Input('variable_2', 'value'),
                Input('variable_3', 'value'), Input('volcano-input', 'value'), 
-               Input('input-title', 'value'), Input('title-size', 'value')])
-def plot_volcano(var1, var2, var3, effects, title, ti_size):
+               Input('chart-title', 'value'), Input('title-size', 'value'), Input('title-color', 'value'),
+               Input('title-x', 'value'), Input('title-y', 'value'),
+               Input('xaxis-title', 'value'), Input('xaxis-size', 'value'), Input('xaxis-color', 'value'),
+               Input('xtick-size', 'value'), Input('xtick-color', 'value'), Input('xtick-width', 'value'), Input('xtick-angle', 'value'),
+               Input('yaxis-title', 'value'), Input('yaxis-size', 'value'), Input('yaxis-color', 'value'),
+               Input('ytick-size', 'value'), Input('ytick-color', 'value'), Input('ytick-width', 'value'), Input('ytick-angle', 'value'),
+              ])
+def plot_volcano(var1, var2, var3, effects,
+                 title, ti_size, ti_color, ti_x, ti_y,
+                 xlab_ti, xlab_size, xlab_color, xtick_size, xtick_color, xtick_width, xtick_angle,
+                 ylab_ti, ylab_size, ylab_color, ytick_size, ytick_color, ytick_width, ytick_angle):
 
     fig = dashbio.VolcanoPlot(
         dataframe=df,
@@ -198,8 +308,6 @@ def plot_volcano(var1, var2, var3, effects, title, ti_size):
         snp="GENE",
         gene="GENE",
         logp=True,
-        xlabel="effect size",
-        ylabel="-log10(p)",
         point_size=var2,
     )
 
@@ -207,9 +315,12 @@ def plot_volcano(var1, var2, var3, effects, title, ti_size):
         plot_bgcolor="rgba(255, 255, 255, 1)",
         paper_bgcolor="rgba(255, 255, 255, 1)",
         font_color="rgba(0,0,0,1)",
-        title=dict(text=title, font=dict(size=ti_size)),
+        title=dict(text=title, font=dict(size=ti_size, color=ti_color), x=ti_x, y=ti_y),
+        xaxis=dict(title=dict(text=xlab_ti, font=dict(size=xlab_size, color=xlab_color)), tickfont=dict(size=xtick_size, color=xtick_color), tickwidth=xtick_width, tickangle=xtick_angle),
+        yaxis=dict(title=dict(text=ylab_ti, font=dict(size=ylab_size, color=ylab_color)), tickfont=dict(size=ytick_size, color=ytick_color), tickwidth=ytick_width, tickangle=ytick_angle),
         margin=dict(t=0),
         autosize=True,
     )
 
     return fig
+

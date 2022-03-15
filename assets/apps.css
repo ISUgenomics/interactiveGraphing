@@ -147,7 +147,7 @@ input[type="checkbox"]:checked:after {
 .drops2 {
   width: 23vw;
   margin-bottom: 1.5vh;
-  margin-left: 5vw;
+  margin-left: 0.5vw;
   display: inline-block;
 }
 .drops3 {width: 15vw !important;}
