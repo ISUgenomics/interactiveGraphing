@@ -113,6 +113,9 @@ input[type="checkbox"]:checked:after {
     border: 0.15vw solid black;
 }
 
+input, textarea, select, fieldset {
+    color: #636363;
+}
 
 .custom-tabs-container {width: 100%;}
 .custom-tabs {background-color: transparent;}
@@ -136,21 +139,19 @@ input[type="checkbox"]:checked:after {
 .labs2 {
   width: 40vw;
 }
+
 .drops {
-  font-size: 20px;
-}
-.drops1 {
-  width: 23vw;
-  margin-bottom: 1.5vh;
+  font-size: 18px;
+  color: #4f4f4f;
   display: inline-block;
-}
-.drops2 {
-  width: 23vw;
   margin-bottom: 1.5vh;
-  margin-left: 0.5vw;
-  display: inline-block;
 }
-.drops3 {width: 15vw !important;}
+
+.drops_sec {
+  width: 4.5vw;
+  margin-left: 1vw;
+}
+
 .dirMSA {
   display: inline-block;
   vertical-align: bottom;
@@ -167,5 +168,33 @@ input[type="checkbox"]:checked:after {
   marginBottom: 0px;
 }
 .graph {height: 90vh;}
+
+
+.collapsible {
+  background-color: #d9d5d2;
+  color: #004275;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  text-align: center;
+  outline: none;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 1vh 0;
+}
+
+.active, .collapsible:hover {
+  background-color: #006699;
+  color: #faf7f5;
+}
+
+.coll-content {
+  padding: 0 0 2vh 1vw;;
+  display: none;
+  overflow: hidden;
+  background-color: rgba(0,0,0,0);
+  margin-left: -1vw;
+}
+
 
 #graph_mers svg.main-svg g.infolayer g.annotation text.annotation-text {font-size: calc(1.8vw) !important;}
