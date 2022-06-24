@@ -28,12 +28,13 @@ If the required versions are not available in the default channels, you can easi
 `TIPS:` Ideally, you should use the internal pip3 in the newly created environment.
 
 ```
-/path_to_your_conda_version/envs/plotly/bin/pip3 install whitenoise==5.1.0
-/path_to_your_conda_version/envs/plotly/bin/pip3 install pandas==1.4.0
-/path_to_your_conda_version/envs/plotly/bin/pip3 install plotly==5.6.0
+/path_to_your_conda_version/envs/plotly/bin/pip3 install whitenoise==6.2.0
+/path_to_your_conda_version/envs/plotly/bin/pip3 install pandas==1.4.3
+/path_to_your_conda_version/envs/plotly/bin/pip3 install plotly==5.9.0
 /path_to_your_conda_version/envs/plotly/bin/pip3 install plotly_express==0.4.1
-/path_to_your_conda_version/envs/plotly/bin/pip3 install dash==2.1.0
-/path_to_your_conda_version/envs/plotly/bin/pip3 install dash_bio==1.0.1
+/path_to_your_conda_version/envs/plotly/bin/pip3 install dash==2.5.1
+/path_to_your_conda_version/envs/plotly/bin/pip3 install dash_bio==1.0.2
+/path_to_your_conda_version/envs/plotly/bin/pip3 install dash-bootstrap-components==1.1.0
 ```
 
 3: Run local python server in your terminal:
