@@ -3,7 +3,7 @@ from dash import html
 from dash.dependencies import Input, Output
 
 from app import app
-from apps import volcano, heatmap
+from apps import manager #, app_volcano #, heatmap
 
 from whitenoise import WhiteNoise
 
@@ -17,10 +17,12 @@ app.layout = html.Div([
               [Input('url', 'pathname')])
 
 def display_page(pathname):
-    if pathname == '/apps/volcano':
-        return volcano.layout
-    elif pathname == '/apps/heatmap':
-        return heatmap.layout
+    if pathname == '/apps/manager':
+        return manager.layout
+#    elif pathname == '/apps/app_volcano':
+#        return app_volcano.layout
+#    elif pathname == '/apps/heatmap':
+#        return heatmap.layout
     else:
         return '404'
 

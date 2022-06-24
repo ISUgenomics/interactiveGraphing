@@ -4,7 +4,6 @@
 
 body {
   position: relative; /* we need this for the scrollspy */
-  background: #fafbfc;
   max-width: 100%;
   overflow-x: hidden;
   font-size: 14px;
@@ -20,13 +19,13 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
 .align-left { 
   float: left;
   text-align: left;
-  padding-left: 4vw;
+  padding-left: 2vw;
   width:50%;
 }
 .align-right {
   float: right;
   text-align: right;
-  padding-right: 4vw;
+  padding-right: 2vw;
   width:50%;
 }
 
@@ -42,16 +41,15 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
   text-align: center;
   -webkit-transition: all .3s;
   transition: all .3s;
-  background: linear-gradient(rgba(207,186,186,1), rgba(207,186,186,0.5),  rgba(207,186,186,0.2), rgba(207,186,186,0));
+  background: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0.8),  rgba(0,0,0,0.5), rgba(0,0,0,0));
 }
 .topnav {
   display: inline-block;
   width: 100%;
-  height: 50px;
   top: 0;
-  padding: 0.8vh 0px;
+  padding: 1vh 0px;
+  margin-bottom: 1vh;
   overflow: hidden;
-  border-bottom: 1px solid #cfbaba;
   background: #e4d1d1;
   color: #5881a8;
   font-size: calc(2vh + 1vw);
@@ -67,6 +65,98 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
 }
 
 /*----------
+  APPS MAIN MENU
+----------*/
+#menuToggle {
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  top: 0px;
+  margin-right: 25px;
+  float: right;
+  z-index: 1;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#menuToggle a {
+  text-decoration: none;
+  color: #006699;
+}
+#menuToggle a:hover {
+  color: #FF7E00;
+}
+#menuToggle input {
+  display: block;
+  position: absolute;
+  width: 40px;
+  height: 32px;
+  top: -7px;
+  right: 0px;
+  cursor: pointer;
+  opacity: 0;
+  z-index: 2;
+  -webkit-touch-callout: none;
+}
+#menuToggle span {
+  display: block;
+  width: 33px;
+  height: 4px;
+  margin-bottom: 5px;
+  position: relative;
+  background: #006699;
+  border-radius: 3px;
+  z-index: 1;
+  transform-origin: 4px 0px;
+  transition: transform 0.5s cubic-bezier(0,0,0,0.5),
+              background 0.5s cubic-bezier(255,126,0,1),
+              opacity 0.55s ease;
+}
+#menuToggle span:first-child {
+  transform-origin: 0% 0%;
+}
+#menuToggle span:nth-last-child(2) {
+  transform-origin: 0% 100%;
+}
+/* Transform all the slices of hamburger into a crossmark.*/
+#menuToggle input:checked ~ span {
+  opacity: 1;
+  transform: rotate(45deg) translate(-2px, -1px);
+  background: #FF7E00;
+}
+#menuToggle input:checked ~ span:nth-last-child(3) {
+  opacity: 0;
+  transform: rotate(0deg) scale(0.2, 0.2);
+}
+#menuToggle input:checked ~ span:nth-last-child(2) {
+  opacity: 1;
+  transform: rotate(-45deg) translate(0, -1px);
+}
+#menu {
+  position: absolute;
+  height: 60px;
+  width: 650px;
+  margin: -42px 0 0 0;
+  padding: 0px 60px 0px 0px;
+  right: -60px;
+  background: linear-gradient(, rgba(0,0,0,0.1));
+  list-style-type: none;
+  -webkit-font-smoothing: antialiased;
+  transform-origin: 0% 0%;
+  transform: translate(100%, 0);
+  transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
+}
+#menu li {
+  display: inline-block;
+  padding: 10px 10px;
+  font-size: 22px;
+  vertical-align:top;
+}
+#menuToggle input:checked ~ ul {
+  transform: none;
+  opacity: 1;
+}
+
+/*----------
   OTHER COMMON COMPONENTS
 ----------*/
 .content {
@@ -77,9 +167,87 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
   -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
   background-position: top right;
-  background-color: #f9f9f9;
   color: #F3E0BE;
-  padding: 0 0;
+}
+#main {
+  padding: 15px 15px;
+}
+.scroller {
+  height: 700px;
+  overflow-y: scroll;
+  scrollbar-color: #5881a8 #000b10;
+  background: rgba(0,0,0,0.5);
+  text-align: justify;
+}
+.scroller h {
+  font-size: 20px;
+  font-weight: 600;
+}
+.scroller a {
+  color: #FF7D27;
+}
+.scroller span {
+  color: #5881a8;
+}
+.scroller img {
+  margin: 10px 0;
+}
+.primary-button a {
+/*  height: 3.5vh;*/
+  padding: 1vh 2vh;
+  display: inline-block;
+  border-radius: 3px;
+  background-image: linear-gradient(#FF6600, #FF7D27);
+  color: #F3E0BE;
+  font-size: 2vh;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.line-dec {
+  width: 45px;
+  height: 3px;
+  background-color: #FF7D27;
+  margin: 20px 0px 20px 0px;
+}
+.precontainer {
+  height: 30px;
+  padding-left: 15px;
+  margin-bottom: 2vh;
+}
+.precontainer a {
+  height:30px;
+}
+.precontainer img {
+  height:27px;
+  vertical-align: top;
+}
+.precontainer h4 {
+  display: inline-block;
+  vertical-align: top;
+  font-size: 24px;
+  font-weight: 500;
+  padding-left:10px;
+}
+.left-text {
+  text-align: justify;
+  color: #F3E0BE;
+}
+.left-text h4 {
+  font-size: 24px;
+  font-weight: 500;
+  text-align: left;
+}
+.left-text span {
+  color: #FF7D27;
+}
+.first-content {
+  font-size: calc(3vh + 1vw);
+  margin-bottom:2vh;
+}
+.first-content em {
+  color: #FF7D27;
 }
 
 
@@ -87,7 +255,9 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
   SUBPAGES BACGROUND IMAGES
 ----------*/
 #home {
-/*  background-blend-mode: lighten;*/
+/*  background-image: url(../img/background/main0.jpeg);*/
+  background-color: rgba(255,255,255,0.6);
+  background-blend-mode: lighten;
 }
 
 #about {
@@ -96,10 +266,56 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
   background-blend-mode: lighten;
 }
 
+#volcano {
+  background-color: #f0efef;
+}
+
 
 /*----------
   SUBPAGES CONTENT
 ----------*/
+
+/* index.html/#home */
+#home {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 15vh;
+  text-align: center;
+  color: #006699;
+}
+#home .container {
+  background: transparent;
+}
+#home h1 {
+  margin-top: 0px;
+  padding-top:10vh;
+  padding-bottom: 2vh;
+  font-size: calc(8vh + 3vw);
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 0px;
+}
+#home em {
+  color: #FF7D27;
+  font-weight: 600;
+  font-style: normal;
+}
+#home span {
+  display: inline-block;
+  margin-top: -20px;
+  font-weight: 400;
+}
+#home .primary-button {
+  padding-top: 15vh;
+}
+#home .bottom-text {
+  margin-left: 22vw;
+  margin-right: 22vw;
+  padding-top: 5vh;
+  text-align: center;
+  font-size: 2vh;
+  color: #5881a8;
+}
 
 .owl-pagination {
   opacity: 1;
@@ -118,16 +334,98 @@ section { padding: 25px 0 35px; background: transparent; padding-bottom: 15px; }
   background: #F3E0BE;
 }
 
-
+/* TABS */
+.tabs {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+.tabs li {
+  display: inline-block;
+  text-align: center;
+  margin: 10px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+.tabs a {
+  display:block;
+  text-align:center;
+  text-decoration:none;
+  text-transform:uppercase;
+  text-align:left;
+  color:#F3E0BE;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border:2px solid #F3E0BE;
+  width: 300px;
+}
+.tabs a:hover {
+  color: #ff7d27;
+}
+.tabs .active {
+  border:2px solid #ff7d27;
+  color: #ff7d27;
+}
+.tabs label{
+  font-size:16px;
+  font-weight: 700;
+  margin-top: 10px;
+  margin-left: 13px;
+}
+.tabgroup div  {
+}
+.tabgroup p {
+  color: #F3E0BE;
+  padding: 15px;
+}
+.clearfix:after {
+  content:"";
+  display:table;
+  clear:both;
+}
+.apps {
+  text-align: center;
+  font-size: 45px;
+  color: black;
+}
+.apps em {
+  color: gray;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 45px;
+}
 /* APPS */
-
+.service-content {
+  width: 100vw;
+  min-height: 100vh;
+  padding-top: 15px;
+  background-attachment: fixed;
+  -moz-background-size: 100% 100%;
+  -webkit-background-size: 100% 100%;
+  background-size: 100% 100%;
+  background-position: top right;
+  text-align: left;
+  font-size: 45px;
+  color: #FFF8E7;
+}
+.service-content .left-text h4 {
+  font-size: 24px;
+  font-weight: 500;
+  color: #FFF8E7;
+}
+.service-content .left-text .line-dec {
+  width: 105px;
+  height: 3px;
+  background-color: #ff7d27;
+  margin: 10px 0px 5px 0px;
+}
+.service-content .plotly {
+  margin: 0px 0px 0px -7px;
+}
 .plotly-app {
-  position: absolute;
-  top: 7.5vh;
-  margin: 0 1vw;
-  width: 98vw;
-  height: 87.5vh;
-  background-color: #f9f9f9;
+  background-color: white;
+  box-shadow: -28px 0 25px -25px rgba(0,0,0,1), 28px 0 25px -25px rgba(0,0,0,1);
 }
 
 
@@ -189,9 +487,19 @@ footer em {
   font-style: normal;
 }
 
+.plotly-app {
+  width: 100%;
+  height: 90vh;
+}
+#app.container {
+  max-height: 90vh;
+}
+#app-m.container {
+  max-height: 70vh;
+}
 
 /*MEDIA DIVICES - PLOTLY APPS*/
-/*@media screen and (max-height: 399px) {
+@media screen and (max-height: 399px) {
   .plotly-app {
     width: 181%;
     height: 155vh;
@@ -215,7 +523,7 @@ footer em {
 }*/
 
 /*MEDIA DIVICES - HTML TABS*/
-/*@media screen and (max-width: 799px) {
+@media screen and (max-width: 799px) {
   #menu {
     transform: none;
     height: 50px;

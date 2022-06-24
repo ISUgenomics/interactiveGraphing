@@ -1,0 +1,20 @@
+***  imports_map.txt       - this file, shows the modular organization of the code
+
+  0. manager.py            - the most external layer of the software; manages tabs
+0.1. paths.py              - automatic generation & menagament of paths on the user machine
+0.2. sqlite_db.py          - code to manage database (e.g., definitions of pipeline settings)
+---- sqlite_internal.db    - database
+
+  1. analysis_setup.py     - the first tab (always static)
+1.1. manage_projects.py    - section 1 in the "Analysis SetUp" tab
+1.2. select_analysis.py    - section 2 in the "Analysis SetUp" tab
+1.3. upload_files.py       - section 3 in the "Analysis SetUp" tab
+
+  2. plotting_template.py  - template for the following tabs
+2.1. plotting_constants.py - plotly plotting constants, such as colors definitions, etc.
+
+  3. [teplates for graph types]
+3.1. app_heatmap.py        - 
+3.2. app_volcano.py        - 
+
+

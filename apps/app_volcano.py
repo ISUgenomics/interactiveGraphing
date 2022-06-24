@@ -58,7 +58,7 @@ settings_style = {'width': '23vw', 'height': 'auto', 'display': 'block', 'backgr
                   'border-radius': '5px 5px 5px 5px', 'position': 'absolute', 'top': '8vh', 'left': '0.5vw', 'z-index': '101',
                   'padding': '1vh 1vw 1vh 1vw', 'marginLeft':'0.5vw'}
 settings_close = {'margin': '0', 'border': '0px', 'color': '#63533c', 'font-size': '24px', 'vertical-align': 'top',
-                  'min-height':'25px', 'max-height':'52px', 'min-width':'25px', 'max-width':'52px',
+                  'min-height':'25px', 'max-height':'30px', 'min-width':'25px', 'max-width':'40px',
                   'position':'absolute', 'top':'0', 'right':'0', 'z-index':'105'}
 
 #### SET OPTIONS SECTION (left panel)
@@ -358,8 +358,8 @@ app.clientside_callback(
           }
           document.getElementById(selected).style.display = "inline-block";
           targetDiv.style.display = "block";
-          document.getElementById("graph").style.width = "71.3vw";
-          document.getElementById("options").style.width = "25.7vw";
+          document.getElementById("graph").style.width = "71vw";
+          document.getElementById("options").style.width = "26vw";
       }
       else {
           document.getElementById("graph").style.width = "82vw";
