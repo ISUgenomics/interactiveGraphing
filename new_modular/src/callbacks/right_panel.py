@@ -31,7 +31,7 @@ def register_right_panel_callbacks(app):
 #                print("8.1 ", data_dir, filename)                                              ############# DEBUG
                 return [False, no_update, no_update, no_update, True]
         else:
-            print("8.1 raise PreventUpdate")
+#            print("8.1 raise PreventUpdate")
             raise PreventUpdate
 
 
@@ -48,4 +48,3 @@ def register_right_panel_callbacks(app):
             return [f"{classes} required", "Invalid path detected! Please correct it and try again."]
         else:
             return [classes.replace('required', '').strip(), '']
-            
