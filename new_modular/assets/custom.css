@@ -428,15 +428,14 @@ input {
 
 /* Custom styles for dcc.Tabs */
 .index-tabs {
-    height: 36px !important;
-    padding: 0px 3.5%;
+    height: 30px !important;
+    padding: 0px 2.6%;
     margin-top: 4px;
     border-bottom: 1px solid rgb(0, 140, 186);
 }
 
 .index-container {
-    width: 32%;
-    height
+    width: 95%;
 }
 
 .index-tab {
@@ -448,7 +447,8 @@ input {
     background-color: var(--col2) !important;
     border: 1px solid var(--col2) !important;
     border-bottom: 1px solid rgb(0, 140, 186) !important;
-    height: 36px !important;
+    height: 30px !important;
+    width: 20%;
 }
 .tab--selected {
     color: var(--col4) !important;
@@ -456,7 +456,7 @@ input {
     display: flex !important;
     align-items: center;
     padding: 0px;
-    height: 36px;
+    height: 30px;
     background-color: white !important;
     border: 1px solid rgb(0, 140, 186) !important;
     border-bottom: 2px solid white !important;
