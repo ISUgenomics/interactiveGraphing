@@ -2,6 +2,26 @@ import plotly.express as px
 from src.functions.widgets import generate_font_options, generate_color_options
 
 # GENERIC DASH VARIABLES
+PARAMS = {'graph-title':'layout.title.text', 'graph-height':'layout.height', 'graph-width':'layout.width',
+          'X-title': 'layout.xaxis.title.text', 'Y-title': 'layout.annotations.0.text',
+          'graph-legend': 'layout.showlegend', 'legend-X': 'layout.legend.x', 'legend-Y': 'layout.legend.y',
+          'margin-l': 'layout.margin.l', 'margin-t': 'layout.margin.t', 'margin-r': 'layout.margin.r', 'margin-b': 'layout.margin.b',
+          'plotting-c': 'layout.plot_bgcolor', 'drawing-c': 'layout.paper_bgcolor',
+          'title-size': 'layout.title.font.size', 'title-font': 'layout.title.font.family', 'title-color': 'layout.title.font.color',
+          'title-posX': 'layout.title.x', 'title-posY': 'layout.title.y',
+          'X-axis-font': 'layout.xaxis.title.font.family', 'X-axis-color': 'layout.xaxis.title.font.color', 'X-axis-size': 'layout.xaxis.title.font.size',
+          'X-line': 'layout.xaxis.showline', 'X-line-color': 'layout.xaxis.linecolor', 'X-line-width': 'layout.xaxis.linewidth', 'X-mirror': 'layout.xaxis.mirror',
+          'X-ticks': 'layout.xaxis.ticks', 'X-ticks-color': 'layout.xaxis.tickcolor', 'X-ticks-width': 'layout.xaxis.tickwidth', 'X-ticks-len': 'layout.xaxis.ticklen',
+          'X-tick-labels': 'layout.xaxis.showticklabels', 'X-tick-font-color': 'layout.xaxis.tickfont.color', 'X-tick-font-size': 'layout.xaxis.tickfont.size',
+          'X-tick-font-pos': 'layout.xaxis.side','X-tick-font-angle': 'layout.xaxis.tickangle', 'X-tick-labels-list': 'layout.xaxis.ticktext',
+          'Y-axis-font': 'layout.annotations.customY.font.family', 'Y-axis-color': 'layout.annotations.customY.font.color', 'Y-axis-size': 'layout.annotations.customY.font.size',
+          'Y-axis-angle': 'layout.annotations.customY.textangle', 'Y-axis-posX': 'layout.annotations.customY.x', 'Y-axis-posY': 'layout.annotations.customY.y',
+          'Y-line': 'layout.yaxis.showline', 'Y-line-color': 'layout.yaxis.linecolor', 'Y-line-width': 'layout.yaxis.linewidth', 'Y-mirror': 'layout.yaxis.mirror',
+          'Y-ticks': 'layout.yaxis.ticks', 'Y-ticks-color': 'layout.yaxis.tickcolor', 'Y-ticks-width': 'layout.yaxis.tickwidth', 'Y-ticks-len': 'layout.yaxis.ticklen',
+          'Y-tick-labels': 'layout.yaxis.showticklabels', 'Y-tick-font-color': 'layout.yaxis.tickfont.color', 'Y-tick-font-size': 'layout.yaxis.tickfont.size',
+          'Y-tick-font-pos': 'layout.yaxis.side','Y-tick-font-angle': 'layout.yaxis.tickangle'}
+# 'Y-labels-data', 'Y-labels-col', 'Y-labels-number', 'Y-labels-zoom-from', 'Y-labels-zoom-to'
+
 
 COLORS = ['aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond', 
           'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 
@@ -43,9 +63,12 @@ CONFIG = {'responsive': True, 'showTips': True,
 
 FONT_OPTS = generate_font_options(FONTS)
 COLOR_OPTS = generate_color_options(COLORS)
+
 CS_OPTS = px.colors.named_colorscales()
 CS_SEQ = px.colors.sequential.swatches_continuous().update_layout(width=350)
 CS_DIV = px.colors.diverging.swatches_continuous().update_layout(width=350)
 CS_CYC = px.colors.cyclical.swatches_continuous().update_layout(width=350)
+
+
 
 
