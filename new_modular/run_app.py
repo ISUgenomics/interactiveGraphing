@@ -2,14 +2,16 @@ from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from src.pages import index, about
 from src.callbacks import register_callbacks
+from src.params.generic import PARAMS                                          # DEBUG ############
 from src.layout.storage import storage, void, identifiers
 from src.layout.options import left_panel
 from src.layout.graphing import right_panel
+from src.functions.widgets import find_component_ids                           # DEBUG ############
 
 external_stylesheets = [
     dbc.themes.BOOTSTRAP, 
-#    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
-    '/assets/custom.css'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
+    '/assets/custom.css', 'font-awesome.min.css'
 ]
 
 external_scripts = [
@@ -63,8 +65,25 @@ app.layout = dbc.Container([
     html.Div(id='app-mode', children=[
         left_panel,
         right_panel
-    ], style={'width':'100%', 'height':'100%', 'overflow-y':'hidden', "display": "none"})
+    ], style={'width':'100%', 'height':'100%', 'overflowY':'hidden', "display": "none"})
 ], fluid=True)
+
+
+
+#### ------- DEBUG SECTION  ------------------- ####
+# [OPTIONAL - DEBUG] Get all component IDs                                                      # DEBUG ############
+def is_component_type(component_id, target_type):
+    if component_id in app.layout:
+        component_instance = app.layout[component_id]
+        return isinstance(component_instance, target_type)
+    return False
+
+all_ids = find_component_ids(app.layout)                                                        # DEBUG ############
+print(all_ids, '\n')                                                                            # DEBUG #########
+missing_keys = set(PARAMS.keys()) - set(all_ids)                                                # DEBUG ############
+print("The following keys from PARAMS are missing in the all_ids list:", missing_keys, '\n')    # DEBUG ############
+#### ------- DEBUG SECTION  ------------------- ####
+
 
 
 # Import all callbacks
