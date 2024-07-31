@@ -16,7 +16,7 @@ def register_basic_callbacks(app):
         elif tab == 'tab-about':
             return about.layout, {"display": "none"}, False
         else:
-            return no_update, {'width':'100%', 'height':'100%', 'overflow-y':'hidden', "display": "flex"}, True
+            return no_update, {'width':'100%', 'height':'100%', 'overflowY':'hidden', "display": "flex"}, True
 
     # Add a new app-tab based on the selected analysis/graphing (at Home tab); make Tabs persistent using storage solution;        # UPGRADE: (optional) use 'disable_n_clicks' to prevent creating more app-tabs than n=10
     @app.callback([Output('tabs', 'children'), Output('add-app-tab-num', 'data')],
