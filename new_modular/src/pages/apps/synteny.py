@@ -24,4 +24,4 @@ import dash_bootstrap_components as dbc
 # Set up the app layout
 layout = html.Div([
 
-], id='app', className="d-flex", style={'width':'100%', 'height':'100%', 'overflow-y':'hidden'})
+], id='app', className="d-flex", style={'width':'100%', 'height':'100%', 'overflowY':'hidden'})

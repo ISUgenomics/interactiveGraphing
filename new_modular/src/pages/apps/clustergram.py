@@ -30,4 +30,4 @@ from src.options.export import opts_config
 layout = html.Div([
 #    left_panel,
 #    right_panel
-], id='app', className="d-flex", style={'width':'100%', 'height':'100%', 'overflow-y':'hidden'})
+], id='app', className="d-flex", style={'width':'100%', 'height':'100%', 'overflowY':'hidden'})
