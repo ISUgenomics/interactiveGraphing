@@ -1,9 +1,10 @@
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from src.pages import index, about
-from src.pages.config import visualizations
 from src.callbacks import register_callbacks
 from src.layout.storage import storage, void, identifiers
+from src.layout.options import left_panel
+from src.layout.graphing import right_panel
 
 external_stylesheets = [
     dbc.themes.BOOTSTRAP, 
@@ -17,8 +18,8 @@ external_scripts = [
 
 app = Dash(__name__, external_stylesheets=external_stylesheets, 
                      external_scripts=external_scripts, 
-                     title="SYNTENY", update_title=None,
-                     suppress_callback_exceptions=False
+                     title="ActiGraph", update_title=None,
+                     suppress_callback_exceptions=True
           )
 
 app.scripts.config.serve_locally=True
@@ -52,18 +53,17 @@ app.layout = dbc.Container([
     dcc.Location(id='location', refresh=False),
     void, identifiers, storage,
     dbc.Row([
-        dbc.Col(dcc.Tabs(id="tabs", value='tab-home', parent_className='index-tabs', className='index-container', children=[
-            dcc.Tab(label='HOME', value='tab-home', className='index-tab'),
-            dcc.Tab(label='ABOUT', value='tab-about', className='index-tab'),
-        ]), width=9, className="pe-0"),
-        dbc.Col(dcc.Dropdown(
-            id='visualizations',
-            options=[{'label': viz.capitalize(), 'value': viz} for viz in visualizations],
-            value='synteny',
-            style={"marginTop":"2px"}
-        ), width=3, className="ps-2 pb-0", style={"paddingRight":"33px"}),
+        dbc.Col(dcc.Tabs(id="tabs", value='tab-home', parent_className='index-tabs', className='index-container',
+                    children=[
+                        dcc.Tab(label='HOME', value='tab-home', className='index-tab'),
+                        dcc.Tab(label='ABOUT', value='tab-about', className='index-tab'),]), 
+                width=12, className="pe-0"),
     ], style={"backgroundColor":"rgb(214, 242, 250)"}),
-    html.Div(id='content')
+    html.Div(id='info-mode'),
+    html.Div(id='app-mode', children=[
+        left_panel,
+        right_panel
+    ], style={'width':'100%', 'height':'100%', 'overflow-y':'hidden', "display": "none"})
 ], fluid=True)
 
 
