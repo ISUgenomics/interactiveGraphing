@@ -207,3 +207,8 @@ opts_bars = [
 ]
 
 
+
+## 4. ADJUST CUSTOM GRAPH SETTINGS
+opts_graph_types = [
+
+]
