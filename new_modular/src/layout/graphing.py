@@ -34,7 +34,7 @@ m_body = html.Div([
 data_inputs = html.Div([
     dbc.Accordion(children = [], id='edition-items', start_collapsed=False, always_open=True, flush=True, persistence=True, persistence_type='session', persisted_props=['active_item']),
     generate_pop_up_modal("modal-save-df", "btn-save-df", "Save", m_body, "Save DataFrame to your local file system", "lg")
-], id='upper-panelDiv', className="resize-vertical", style={'min-height':'fit-content', 'max-height':'100vh'}) #, 'height':'fit-content'
+], id='upper-panelDiv', className="resize-vertical", style={'minHeight':'fit-content', 'maxHeight':'100vh'}) #, 'height':'fit-content'
 
 graph_analysis = html.Div(id='graph-panelDiv')
 
