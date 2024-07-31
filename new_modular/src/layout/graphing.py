@@ -45,7 +45,7 @@ right_panel = html.Div([
   html.Div([
     dbc.Accordion([
       dbc.AccordionItem(data_inputs, title="EDIT INPUT DATA", item_id="item-11", ), # style={'display':'none'} ## JS management
-      dbc.AccordionItem(graph_analysis, title="DISPLAY CLUSTERGRAM", item_id="item-12", ), # style={'display':'none'} ## JS management
+      dbc.AccordionItem(graph_analysis, title="DISPLAY INTERACTIVE GRAPHS", item_id="item-12", ), # style={'display':'none'} ## JS management
       dbc.AccordionItem(data_outputs, title="EXTRACT OUTPUT DATA", item_id="item-13", ), # style={'display':'none'} ## JS management
     ], id="accordion2", start_collapsed=True, always_open=True, flush=False), 
   ], id='app-bodyDiv')
