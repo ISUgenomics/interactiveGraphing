@@ -3,6 +3,7 @@ from dash import html, dcc
 from src.params.generic import CONFIG
 
 storage = html.Div([
+  dcc.Store(id="add-app-tab-num", data=[], storage_type='session'),      # children of the app Tabs
   dcc.Store(id="data-dir", data=str(Path.cwd().parent / "data"), storage_type='session'),
   dcc.Store(id="user-files-list", data={}, storage_type='session'),      # dict of currently loaded inputs {name: base64 content}
   dcc.Store(id="user-files-status", data='', storage_type='session'),    # time_stamp triggering the emptying of the upload box
