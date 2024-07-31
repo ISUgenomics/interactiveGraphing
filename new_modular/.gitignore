@@ -1,7 +1,7 @@
 
-__pycache__/
+**/__pycache__/*
+**/.ipynb_checkpoints/*
 *.pyc
-.ipynb_checkpoints
 .DS_Store
 .env
 projects.db
