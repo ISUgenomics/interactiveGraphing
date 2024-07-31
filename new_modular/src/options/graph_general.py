@@ -164,6 +164,8 @@ graph_advanced_Y = [
     ], className='row align-items-top mx-0 h34',),
 ]
 
+
+# Final assembly of general graph options
 opts_graph = [
   html.Div([
     html.Label('graph title: ', className='col-4 d-inline label-s', title=tooltip['graph-title']),

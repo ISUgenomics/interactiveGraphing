@@ -4,7 +4,8 @@ from src.params.variables import tooltip
 from src.params.styles import *
 
 
-## D. EXPORT GRAPH IMAGE [static_img_format, static_img_filename, static_img_height, static_img_width, static_img_scale]
+## D. EXPORT GRAPH IMAGE 
+# [static_img_format, static_img_filename, static_img_height, static_img_width, static_img_scale]
 # ('img-format', 'value'), ('img-name', 'value'), ('img-height', 'value'), ('img-width', 'value'), ('img-scale', 'value'), ('export-html', 'value'), ('html-name', 'value')
 opts_config = [
   html.Div([

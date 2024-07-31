@@ -5,7 +5,7 @@ from src.params.variables import tooltip
 from src.params.styles import *
 from src.functions.widgets import generate_pop_up_modal
 
-# 4. CUSTOMIZED OPTIONS FOR SELECTED PLOT
+# 4. CUSTOMIZED OPTIONS FOR SELECTED PLOT TYPE
 
 ## A. CUSTOMIZE HEATMAP
 
@@ -207,8 +207,15 @@ opts_bars = [
 ]
 
 
+## C. CUSTOMIZE SYNTENY PLOT
 
-## 4. ADJUST CUSTOM GRAPH SETTINGS
+opts_synteny = [
+    
+]
+
+### -------------------------------------- ###
+
+# Final assembly of custom graph settings
 opts_graph_types = [
 
 ]
