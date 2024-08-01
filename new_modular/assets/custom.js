@@ -59,20 +59,9 @@ function observeStyleChanges() {
                 y.style.backgroundColor = "#008CBA";
                 y.style.color = "white";
                 y.innerText = "≡";
-                z.style.width = "2.3%";
+                z.style.width = "37px";
             }
             return {display: x.style.display}; // Return an object for Dash compatibility
-        },
-        
-        // F1: Automatically unfold Edit Iput Data (right-panel)
-        unfoldEditPanel: function(n_clicks, activeItems) {
-            var isClicked = n_clicks.some(function(clicks) { return clicks > 0; });
-            if (!activeItems) { activeItems = []; }
-            if (isClicked && !activeItems.includes('item-11')) {
-                activeItems.push('item-11');
-                return activeItems;
-            }
-            return activeItems;
         },
         
         // F1: Add Item buttons for each data table: manage datatable (save, cache, close)
