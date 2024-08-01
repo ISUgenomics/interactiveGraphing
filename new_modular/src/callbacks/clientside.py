@@ -15,17 +15,20 @@ def register_clientside_callbacks(app):
         prevent_initial_call=True
     )
 
-#    app.clientside_callback(
-#        """
-#        function(n_clicks, activeItems) {
-#            return window.dash_clientside.clientside.unfoldEditPanel(n_clicks, activeItems);
-#        }
-#        """,
-#        Output('accordion2', 'active_item'),
-#        [Input({'type': 'edit-', 'id': ALL}, 'n_clicks')],
-#        [State('accordion2', 'active_item')],
-#        prevent_initial_call=True
-#    )
+    # toggle the display of EDIT INPUT DATA section with the first/any input edited
+    app.clientside_callback(
+        """
+        function(n_clicks, activeItems) {
+            if (!activeItems) { activeItems = []; }
+            activeItems.push('item-11');
+            return activeItems;
+        }
+        """,
+        Output('accordion2', 'active_item'),
+        [Input('inputs-clicks', 'data')],
+        [State('accordion2', 'active_item')],
+        prevent_initial_call=True
+    )
 
     # create item buttons for DataTables
 #    app.clientside_callback(
