@@ -429,7 +429,7 @@ input {
 /* Custom styles for dcc.Tabs */
 .index-tabs {
     height: 30px !important;
-    padding: 0px 2.2%;
+    padding: 0px 36px;
     margin-top: 4px;
     border-bottom: 1px solid rgb(0, 140, 186);
 }
