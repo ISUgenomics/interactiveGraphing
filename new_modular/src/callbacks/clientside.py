@@ -29,23 +29,14 @@ def register_clientside_callbacks(app):
         [State('accordion2', 'active_item')],
         prevent_initial_call=True
     )
-
-    # create item buttons for DataTables
-#    app.clientside_callback(
-#        ClientsideFunction(
-#            namespace='rightPanel',
-#            function_name='createItemButtons'
-#        ),
-#        Output('void1', 'value'),
-#        [Input({'type': 'item-', 'id': ALL}, 'n_clicks')]
-#    )
     
-    # move DataTable buttons
+    # style and move DataTable buttons
     app.clientside_callback(
-        ClientsideFunction(
-            namespace='rightPanel',
-            function_name='moveDataTableButtons'
-        ),
+        """
+        function(content) {
+            return window.dash_clientside.clientside.moveDataTableButtons(content);
+        }
+        """,
         Output('void2', 'value'),
         [Input('edition-items', 'children')]
     )
