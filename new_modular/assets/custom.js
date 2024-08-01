@@ -64,30 +64,10 @@ function observeStyleChanges() {
             return {display: x.style.display}; // Return an object for Dash compatibility
         },
         
-        // F1: Add Item buttons for each data table: manage datatable (save, cache, close)
-        CreateItemButtons: function() {
-            var y = document.getElementById("edition-items");
-            var items = y.getElementsByClassName('accordion-item');
-            
-            if (items.length > 0) {
-                for(var i = 0; i < items.length; i++) {      
-                    var item = items[i];
-                    var btns = items[i].getElementsByClassName("accordion-body")[0].children.item(0);
-                    console.log("CreateItemButtons: ", btns); // DEBUG
-                    var header = items[i].getElementsByClassName('accordion-header')[0];        
-                    var counts = header.getElementsByTagName('button');
-                    if (counts.length == 1) {
-                        header.getElementsByClassName('accordion-button')[0].setAttribute('style', 'display: inline-flex;');
-                        header.appendChild(btns);
-                    }
-                }
-            }
-            return '';
-        },
-
-        // F2: Add DT buttons for each data table: edit datatable (add col/row, toggle, export, etc)
-        MoveDataTableButtons: function() {
-            // Get all the DataTable menus
+        // F1: Add DT buttons for each data table: edit datatable (add col/row, toggle, export, etc); 
+        // F2: Add Item buttons for each data table: manage datatable (save, cache, close); 
+        //     Move buttons to the expected location in DOM
+        moveDataTableButtons: function() {
             var y = document.getElementById("edition-items");
             if (y) {
                 var items = y.getElementsByClassName('accordion-body');
@@ -98,9 +78,10 @@ function observeStyleChanges() {
                         var refElem = item.getElementsByClassName('dash-spreadsheet-menu-item')[0];
                         var buttons = item.getElementsByClassName('dt-buttons')[0];
                         var format = buttons.getElementsByClassName('export-format')[0];
-                        console.log("MoveDataTableButtons: ", buttons); // DEBUG
-                        
-                        if (menu && refElem && buttons) {
+                        console.log("moveDataTableButtons: ", buttons); // DEBUG
+                
+                        // 1) Check if the buttons have already been moved; if not: style and move "dt-buttons" div above Data Table 
+                        if (menu && refElem && buttons && !buttons.classList.contains('moved')) {
                             buttons.setAttribute('style', 'display: inline-flex;');
                             menu.insertBefore(buttons, refElem);
                             menu.classList.add('frame', 'p-1');
@@ -116,8 +97,26 @@ function observeStyleChanges() {
                             var parent = current.closest('div');
                             parent.style.display = 'flex';
                             parent.insertBefore(format, current);
+
+                            // Mark the buttons as moved
+                            buttons.classList.add('moved');
                         } else {
-                            console.log('Element Menu, Reference or Buttons not found');
+                            console.log('Buttons not found or already moved');
+                        }
+                    }
+                }
+                // 2) Move "my-buttons" div to inline-flex with "accordion-header"
+                var items = y.getElementsByClassName('accordion-item');   
+                if (items.length > 0) {
+                    for(var i = 0; i < items.length; i++) {      
+                        var item = items[i];
+                        var btns = items[i].getElementsByClassName("accordion-body")[0].children.item(0);
+                        console.log("CreateItemButtons: ", btns); // DEBUG
+                        var header = items[i].getElementsByClassName('accordion-header')[0];        
+                        var counts = header.getElementsByTagName('button');
+                        if (counts.length == 1) {
+                            header.getElementsByClassName('accordion-button')[0].setAttribute('style', 'display: inline-flex;');
+                            header.appendChild(btns);
                         }
                     }
                 }
@@ -127,6 +126,7 @@ function observeStyleChanges() {
             observeStyleChanges(); // Ensure this is called to observe changes
             return '';
         }
+
         // next function goes here; add comma above!
 
     }
