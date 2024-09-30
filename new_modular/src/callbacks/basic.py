@@ -8,15 +8,15 @@ from src.pages.config import visualizations
 
 def register_basic_callbacks(app):
     # Decide on the layout displayed depending on the selected app tab
-    @app.callback([Output('info-mode', 'children'), Output('app-mode', 'style'), Output('info-mode', 'hidden')],
+    @app.callback([Output('info-mode', 'children'), Output('app-mode', 'hidden'), Output('info-mode', 'hidden')],
                   [Input('tabs', 'value')])
     def render_content(tab):
         if tab == 'tab-home':
-            return index.layout, {"display": "none"}, False
+            return index.layout, True, False
         elif tab == 'tab-about':
-            return about.layout, {"display": "none"}, False
+            return about.layout, True, False
         else:
-            return no_update, {'width':'100%', 'height':'100%', 'overflowY':'hidden', "display": "flex"}, True
+            return no_update, False, True
 
     # Add a new app-tab based on the selected analysis/graphing (at Home tab); make Tabs persistent using storage solution;        # UPGRADE: (optional) use 'disable_n_clicks' to prevent creating more app-tabs than n=10
     @app.callback([Output('tabs', 'children'), Output('add-app-tab-num', 'data')],
