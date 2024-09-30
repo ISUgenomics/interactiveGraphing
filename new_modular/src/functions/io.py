@@ -3,6 +3,7 @@ import os
 import base64
 import json
 import pandas as pd
+from dash import dcc, no_update
 
 # Generic functions
 
@@ -12,6 +13,8 @@ def decode_base64(filename, string):
         decoded = base64.b64decode(string)
         if filename.endswith('.csv'):
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        elif filename.endswith('.tsv'):
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t')
         elif filename.endswith('.xls') or filename.endswith('.xlsx'):
             df = pd.read_excel(io.BytesIO(decoded))
         elif filename.endswith('.json'):
@@ -76,4 +79,16 @@ def export_df(df, to_format, filename, storage=None, custom=None, download=False
             else:
                 return dcc.send_data_frame(export_method, outfile, **params)            
     else:
-        return no_update
+        return no_update                                                            ######## Validate it !!!
+    
+
+# Helper function to format numbers with k, M, B
+def format_length(length):
+    if length >= 1_000_000_000:
+        return f"{length / 1_000_000_000:.2f}B"
+    elif length >= 1_000_000:
+        return f"{length / 1_000_000:.2f}M"
+    elif length >= 1_000:
+        return f"{length / 1_000:.2f}k"
+    else:
+        return str(length)
