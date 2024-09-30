@@ -15,6 +15,6 @@ opts_inputs = [
     ], className="col-4 d-inline ps-2"),
   ], className="row ms-0 align-items-center"),    
   html.P(''),
-  html.Label(id="settings-upload-label", className='label-l'),
+  html.Label('', id="settings-upload-label", className='label-l'),
   html.Div(children=[], id="settings-upload-inputs", className="mt-3")
 ]
