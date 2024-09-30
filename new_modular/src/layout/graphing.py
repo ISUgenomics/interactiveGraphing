@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from src.params.styles import *
 from src.functions.widgets import generate_pop_up_modal
 
-
+# MODAL BODY component
 m_body = html.Div([
     html.Label('Choose the location(s) to save your file:', className='col-12 d-block mb-1 label-s', title=''),
     dcc.Checklist(id='opts-save-df', value='', inline=False, className='col-6 d-inline w-50', labelClassName='label-l spaced',
@@ -31,14 +31,20 @@ m_body = html.Div([
     dcc.Download(id="download-dataframe"),
 ], className='row')
 
+#--------------------------------#
+
+# EDIT INPUT DATA SECTION
 data_inputs = html.Div([
     dbc.Accordion(children = [], id='edition-items', start_collapsed=False, always_open=True, flush=True, persistence=True, persistence_type='session', persisted_props=['active_item']),
     generate_pop_up_modal("modal-save-df", "btn-save-df", "Save", m_body, "Save DataFrame to your local file system", "lg")
 ], id='upper-panelDiv', className="resize-vertical", style={'minHeight':'fit-content', 'maxHeight':'100vh'}) #, 'height':'fit-content'
 
-graph_analysis = html.Div(id='graph-panelDiv')
-
+# DISPLAY INTERACTIVE SECTION
+graph_analysis = html.Div(id='graph-panelDiv', children=[dcc.Graph(id='graph')])
+# EXTRACT OUTPUT DATA SECTION
 data_outputs = html.Div(id='lower-panelDiv')
+
+#--------------------------------#
 
 # APP-BODY Components assembly
 right_panel = html.Div([
