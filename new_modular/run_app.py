@@ -65,7 +65,7 @@ app.layout = dbc.Container([
     html.Div(id='app-mode', children=[
         left_panel,
         right_panel
-    ], style={'width':'100%', 'height':'100%', 'overflowY':'hidden', "display": "none"})
+    ], style={'width':'100%', 'height':'100%', 'overflowY':'hidden', "display": "flex"}, hidden=True)
 ], fluid=True)
 
 
