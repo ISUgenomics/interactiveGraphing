@@ -16,44 +16,58 @@ def register_storage_callbacks(app):
 
     # [MANAGE FILES 1/4] The function creates a dict of user-loaded files that can be used for plotting; user-purged inputs are removed from memory
     @app.callback(Output('user-files-list', 'data'),
-                 [Input('upload-box', 'filename'), Input('upload-box', 'contents'), Input('download-btn', 'n_clicks'),
-                  Input({'type': 'remove-', 'id': ALL}, 'n_clicks')],
+                 [Input('upload-box', 'filename'), Input('upload-box', 'contents'), Input('download-btn', 'n_clicks'), Input('captured-name-store', 'data')],
                  [State('custom-url', 'value'), State('user-files-list', 'data')],
                   prevent_initial_call = True)
-    def create_input_list(files_box, contents_box, url_clicks, n_clicks, url, files):
+    def create_input_list(files_box, contents_box, download_clicks, removed_input, url, files):
         print('0. update files list triggered')                                                                                #############  DEBUG
+        print('0. removed input: ', removed_input)
         ctx = callback_context.triggered
+        
+#        if files is None:
+#            files = {}
+        
         if ctx:
             tnv = get_triggered_info(ctx)  # [type, name, value]
-            print('0. CTX: ', tnv[0], tnv[1])                                                                                             #############  DEBUG
-            if len(tnv) and tnv[0] != '':
-                if int(tnv[2]) > 0:
-                    files.pop(str(tnv[1]), None)
-                    print('0. -by remove ', str(len(files)))                                                                   #############  DEBUG
-                    return files
-            else:
-                if files_box:
-                    for num, i in enumerate(files_box):
-                        if i != '' and i not in files:
-                            try:
-                                content_type, content_string = contents_box[num].split(',')
-                                files[str(i)] = content_string
-                            except Exception as e:
-                                print(f"Error processing upload content: {e}")
-                print('0. -by upload ', str(len(files)))                                                                        #############  DEBUG
-
-                if url:
-                    filename = url.strip().split('/')[-1]
-                    if filename not in files:
+            print('0. CTX: ', tnv[0], ' ; ', tnv[1])                                                                          #############  DEBUG
+            
+            # Handle remove button clicks
+#            print("0. HERE: ", remove_clicks, remove_ids)    #######
+#            if len(remove_clicks):
+#                remove_clicks = remove_clicks[0]
+#                if any(click > 0 for index, click in enumerate(remove_clicks)):
+#                        ix = index
+#                    print("0. index: ", index, remove_ids[index]['id'])
+#                for remove_id, click_count in zip(remove_clicks, remove_clicks):
+#                    if click_count > 0:
+#                        files.pop(remove_id['id'], None)
+#                        print('0. -by remove ', str(len(files)), files.keys())                                                 #############  DEBUG
+#                return no_update
+            
+            # Handle file uploads
+            if files_box:
+                for num, i in enumerate(files_box):
+                    if i != '' and i not in files:
                         try:
-                            with request.urlopen(url) as f:
-                                content = f.read().decode('utf-8')
-                                content = base64.b64encode(content.encode('ascii')).decode('ascii')
-                            files[filename] = content
-                            print('0. -by URL ', str(len(files)))                                                                #############  DEBUG
+                            content_type, content_string = contents_box[num].split(',')
+                            files[str(i)] = content_string
                         except Exception as e:
-                            print(f"Error processing URL content: {e}")
-                return files
+                            print(f"Error processing upload content: {e}")
+                print('0. -by upload ', str(len(files)), files.keys())                                                         #############  DEBUG
+                
+            # Handle URL-based file additions
+            if url:
+                filename = url.strip().split('/')[-1]
+                if filename not in files:
+                    try:
+                        with request.urlopen(url) as f:
+                            content = f.read().decode('utf-8')
+                            content = base64.b64encode(content.encode('ascii')).decode('ascii')
+                        files[filename] = content
+                        print('0. -by URL ', str(len(files)))                                                                  #############  DEBUG
+                    except Exception as e:
+                        print(f"Error processing URL content: {e}")
+            return files
         return no_update
 
 
@@ -63,30 +77,30 @@ def register_storage_callbacks(app):
                   [Input("user-files-list", "data")],
                   [State("user-files-list", "modified_timestamp"), State("inputs-clicks", 'data')])
     def display_inputs_settings(loaded_files, time_stamp, counts):
-        print('1. display-inputs triggered')                                                                                      #############  DEBUG
+        print('1. display-inputs triggered')                                                                                    #############  DEBUG
         if not len(loaded_files):
-            print('1. -no update')                                                                                                #############  DEBUG
-            return["Please load inputs using available options.", no_update, time_stamp]
-        else:
-            print('1. -update ', str(len(loaded_files)), '\n')  #, loaded_files                                                    #############  DEBUG
-            info = "The following files were loaded: "
-            inputs = []
-            for filename, content in loaded_files.items():
-                try:
-                    n_clicks = counts.get(filename, 0)
-                    file_size_kb = round(len(content) * (3 / 4) / 1000, 1)
-                    item = html.Div([
-                      generate_html_label('- ' + str(filename) + '   (' + str(file_size_kb) + ' kB)', "col-8 d-inline"),
-                      generate_dbc_button(["edit ", html.I(className="fa fa-external-link")], {'type': "edit-", 'id': str(filename)}, n_clicks, "sm", True, "secondary", "ms-2 me-1 h34", style={'width': '20%'}),
-                      dbc.Tooltip(children=tooltip['edit-'], target={'type':"edit-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
-                      generate_dbc_button([html.I(className="fa fa-times")], {'type':"remove-",'id': str(filename)}, 0, "sm", True, "danger", "ms-1 me-2 h34", style={'width':'0', 'flexGrow': '1'}),
-                      dbc.Tooltip(children=tooltip['remove-'], target={'type':"remove-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
-                    ], id={'type':"file-",'id': str(filename)}, className="row ms-0 align-items-center d-flex")
-                    inputs.append(item)
-                except Exception as e:
-                    print(f"Error processing file '{filename}': {e}")
+            print('1. -no update')                                                                                              #############  DEBUG
+            return ["Please load inputs using available options.", [], time_stamp]
+        
+        print('1. -update ', str(len(loaded_files)), '\n')  #, loaded_files                                                     #############  DEBUG
+        info = "The following files were loaded: "
+        inputs = []
+        for filename, content in loaded_files.items():
+            try:
+                n_clicks = counts.get(filename, 0) if counts else 0
+                file_size_kb = round(len(content) * (3 / 4) / 1000, 1)
+                item = html.Div([
+                    generate_html_label(f"- {filename}   ({file_size_kb} kB)", "col-8 d-inline"),
+                    generate_dbc_button(["edit ", html.I(className="fa fa-external-link")], {'type': "edit-", 'id': str(filename)}, n_clicks, "sm", True, "secondary", "ms-2 me-1 h34", style={'width': '20%'}),
+                    dbc.Tooltip(children=tooltip['edit-'], target={'type':"edit-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
+                    generate_dbc_button([html.I(className="fa fa-times")], f"remove-{str(filename)}", 0, "sm", True, "danger", "ms-1 me-2 h34 remove-inputs", style={'width':'0', 'flexGrow': '1'}),
+                    dbc.Tooltip(children=tooltip['remove-'], target={'type':"remove-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
+                ], id=f"file-{str(filename)}", className="row ms-0 align-items-center d-flex") #{'type':"file-",'id': str(filename)}
+                inputs.append(item)
+            except Exception as e:
+                print(f"Error processing file '{filename}': {e}")
 
-            return [info, inputs, time_stamp]
+        return [info, inputs, time_stamp]
 
 
     # [MANAGE FILES 3/4] Clear Upload Box (filename & contents)
@@ -109,12 +123,12 @@ def register_storage_callbacks(app):
 
 
     # [MANAGE FILES 4/4] Remove input-related items from the display (once purged by the user); removes content not a component
-    @app.callback(Output({'type': 'file-', 'id': MATCH}, 'children'),
-                 [Input({'type': 'remove-', 'id': MATCH}, 'n_clicks')],
-                  prevent_initial_call = True)
-    def remove_files(n_clicks):
-        print('3. remove-input from display triggered')                                                                             #############  DEBUG
-        return None
+#    @app.callback(Output({'type': 'file-', 'id': MATCH}, 'children'),
+#                 [Input({'type': 'remove-', 'id': MATCH}, 'n_clicks')], [State({'type': 'file-', 'id': MATCH}, 'children')],
+#                  prevent_initial_call = True)
+#    def remove_files(n_clicks, state):
+#        print('3. remove-input from display triggered', state)                                                                             #############  DEBUG
+#        return None
 
 
     ################################################################################################# 
