@@ -186,8 +186,8 @@ body {
 
 
 /* - DCC CHECKBOX MENU - */
-
-input[type="checkbox"] {                /*original*/
+ /*original*/
+/*input[type="checkbox"] {
     position: relative;
     cursor: pointer;
     display: inline-block;
@@ -196,8 +196,9 @@ input[type="checkbox"] {                /*original*/
     width: 0px;
     height: 0px;
     margin-right: 20px;
-}
-input[type="checkbox"]:after {          /*unselected*/
+}*/
+/*unselected*/
+/*input[type="checkbox"]:after {
     content: '';
     display: block;
     position: relative;
@@ -208,8 +209,9 @@ input[type="checkbox"]:after {          /*unselected*/
     background-color: var(--col5);
     border-radius: 30%;
     border: 1px solid lightgray;
-}
-input[type="checkbox"]:checked:after {  /*selected*/
+}*/
+/*selected*/
+/*input[type="checkbox"]:checked:after {
     width: 15px;
     height: 15px;
     left: 0;
@@ -218,7 +220,15 @@ input[type="checkbox"]:checked:after {  /*selected*/
     border-radius: 30%;
     position: relative;
     border: 3px solid var(--col3);
-}
+}*/
+
+.shift-up {transform: translateY(-1.2em);}
+
+.item {background-color: transparent !important;}
+
+.item-content {overflow: hidden !important; transform: translateX(-10px); padding:0; margin:0 !important;}
+
+.react-grid-item > .react-resizable-handle {display: none;}
 
 .checkbox-label {
   position: relative;
