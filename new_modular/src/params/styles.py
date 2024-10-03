@@ -1,6 +1,6 @@
 # TEMPORARY INLINE CSS STYLES
 
-css_lpd = {'display':'inline-block', 'backgroundColor':'#D6F2FA', 'borderRight': '1px solid #008CBA', 'overflowY':'auto', 'overflowX':'hidden', 'height':'95vh', 'padding':'5px'}
+css_lpd = {'display':'inline-block', 'backgroundColor':'#D6F2FA', 'borderRight': '1px solid #008CBA', 'overflowY':'auto', 'overflowX':'hidden', 'height':'95vh', 'padding':'5px', 'max-width': '400px'}
 css_rpd = {'display':'inline-block', 'backgroundColor':'ghostwhite', 'padding':'20px', 'overflowY':'auto', 'overflowX':'hidden', 'height':'95vh', 'flexGrow': '1', 'width':'0'}
 css_btn = {'fontSize':'20px', 'backgroundColor':'#008CBA', 'color':'white', 'border':'1px solid #006B88', 'borderRadius':'8px', 'marginBottom':'10px'}
 
