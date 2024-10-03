@@ -222,13 +222,6 @@ body {
     border: 3px solid var(--col3);
 }*/
 
-.shift-up {transform: translateY(-1.2em);}
-
-.item {background-color: transparent !important;}
-
-.item-content {overflow: hidden !important; transform: translateX(-10px); padding:0; margin:0 !important;}
-
-.react-grid-item > .react-resizable-handle {display: none;}
 
 .checkbox-label {
   position: relative;
@@ -473,3 +466,21 @@ input {
     border-bottom: 2px solid white !important;
 
 }
+
+
+
+/* --- Analysis options --- */
+
+#opts-analysis .card-body {
+  padding: 0 !important;
+}
+
+.shift-up {transform: translateY(-1.2em);}
+
+.item {background-color: transparent !important;}
+
+.item-content {overflow: hidden !important; transform: translateX(-10px); padding:0; margin:0 !important;}
+
+.react-grid-item {width: fit-content !important;}
+
+.react-grid-item > .react-resizable-handle {display: none;}
