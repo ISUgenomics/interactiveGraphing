@@ -210,12 +210,34 @@ opts_bars = [
 ## C. CUSTOMIZE SYNTENY PLOT
 
 opts_synteny = [
-    
+    # Chromosome Spacing
+    html.Div([
+        html.Label('chr spacing:', className='col-4 d-inline label-s', title="Adjust spacing between chromosomes"),
+        dcc.Input(id="synteny-chr-spacing", type="number", min=0.001, max=0.5, step=0.001, placeholder="Enter spacing", value=0.01, debounce=True, className='col-8'),
+    ], className="row align-items-center pe-2 h34"),
+
+    # Chromosome Height
+    html.Div([
+        html.Label('chr height:', className='col-4 d-inline label-s', title="Adjust height of chromosomes"),
+        dcc.Input(id="synteny-chr-height", type="number", min=0.5, max=19, step=0.1, placeholder="Enter height", value=3, debounce=True, className='col-8'),
+    ], className="row align-items-center mt-2 pe-2 h34"),
+
+    # Alignment Selection
+    html.Div([
+        html.Label('chr align:', className='col-4 d-inline label-s', title="Choose alignment mode"),
+        dcc.Dropdown(id="synteny-chr-alignment", options = [{'label': value, 'value': value} for value in ['left', 'right', 'center', 'block']], 
+            value='center', className='col-8', clearable=False,
+        ),
+    ], className="row align-items-center mt-2 pe-2 mb-4 h34"),
+
+    # Position Mode Selection
+    html.Div([
+        html.Label('synteny position:', className='col-4 d-inline label-s', title="Choose position mode for chromosomes"),
+        dcc.RadioItems(['exact', 'middle'], value='exact', id="synteny-line-position", inline=True, className='col-8'),
+    ], className="row align-items-center mt-2 pe-2 h34"),    
 ]
 
 ### -------------------------------------- ###
 
 # Final assembly of custom graph settings
-opts_graph_types = [
-
-]
+opts_graph_types = html.Div(id="opts-graph-cutom")

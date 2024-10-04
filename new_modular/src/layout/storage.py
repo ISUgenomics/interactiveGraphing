@@ -12,6 +12,7 @@ storage = html.Div([
   dcc.Store(id="edition-current", data={}, storage_type='session'),      # real content of input edition section (all data tables): current state, used for onload
   dcc.Store(id="edition-history", data={}, storage_type='session'),      # trace of changes made in (all data tables): changes only, used for undo
   dcc.Store(id='captured-name-store', data='', storage_type='session'),
+  dcc.Store(id='draggable-layout', data={}, storage_type='session'), 
   dcc.Store(id="graph-config", data=CONFIG, storage_type='session'),     # current config of built-in interactive tools in the graph
 #  dcc.Store(id="graph-options-store", data={}, storage_type='session'),  # dict with keys of current graph tabs with values of all options for a given graph
   dcc.Store(id="graph-data", data={}, storage_type='session'),           # dict that stores graph data for each plotting tab; tab-id : {subset : df_data}
