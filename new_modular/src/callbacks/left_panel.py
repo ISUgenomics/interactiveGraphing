@@ -1,18 +1,20 @@
 import re
+from collections import defaultdict
 import pandas as pd
 import plotly.colors as pc
 import plotly.express as px
 import plotly.graph_objs as go
-from dash import dcc, html, callback_context, no_update
+from dash import dcc, html, callback_context, no_update, Patch
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash.exceptions import PreventUpdate
 import dash_draggable
 from src.functions.io import decode_base64, format_length
 from src.functions.widgets import get_triggered_info
-from src.functions.graph import load_dataframe, extract_genome_names, process_chromosomes, generate_synteny_lines, create_genome_options, create_chromosome_traces, filter_synteny_lines, create_synteny_line_traces, update_layout 
+from src.functions.graph import load_dataframe, extract_genome_names, process_chromosomes, generate_synteny_lines, create_genome_options, assign_chromosome_positions, create_chromosome_traces, create_bezier_synteny_lines, update_layout 
 
 from src.options.analysis import synteny
+from src.options.graph_custom import opts_synteny
 
 def register_left_panel_callbacks(app):
     
@@ -53,31 +55,50 @@ def register_left_panel_callbacks(app):
                 return globals()[var_name]
             else:
                 return html.Label(f"No analysis settings available for {var_name} plot type.", className="label-s")
-            
+
+
+    # Update Custom Graph settings options: display analysis settings for currently open graphing tab, e.g., synteny
+    @app.callback(Output("opts-graph-cutom", "children"),
+                  Input('tabs', 'value'),
+                  State('opts-graph-cutom', 'children'),
+    )
+    def update_custom_graph_opts(active_tab, content):
+        print("\ncallback 1: update_custom_graph_opts()")                                         ########## DEBUG
+        if active_tab == 'tab-home' or active_tab == 'tab-about':
+            raise PreventUpdate
+        else:
+            var_name = active_tab.split('_')[0].split('-')[1]
+            if content:
+                return content
+            elif f"opts_{var_name}" in globals():
+                return globals()[f"opts_{var_name}"]
+            else:
+                return html.Label(f"No custom graph options available for {var_name} plot type.", className="label-s")
+
 
     # Update Analysis settings options: synteny input dropdown
     @app.callback(Output("synteny-inputs", "options"),
                  [Input("opts-analysis", "children"), Input('user-files-list', 'data'), Input('edition-content', 'data'), ],
-                  State("synteny-inputs", "options")
+                 [State("synteny-inputs", "options"), State("synteny-inputs", "value")]
     )
-    def update_synteny_inputs(opts_analysis, files, edits, current):
+    def update_synteny_inputs(opts_analysis, files, edits, current, value):
         print("\ncallback 2: update_synteny_inputs()")                                         ########## DEBUG
-        if not current:
-            df_ids = sorted(set(files.keys()).union(edits.keys()))
+        df_ids = sorted(set(files.keys()).union(edits.keys()))
+        if df_ids != current:
             return df_ids
         else:
-            return current
+            raise PreventUpdate
 
 
     # Backend calculations for the synteny plot; Update Analysis settings options: synteny genomes checkboxes
     @app.callback(
         [Output("graph-data", "data"), Output("synteny-genomes-all", "data"), Output("synteny-chromosomes-all", "data")],
          Input("synteny-inputs", "value"),
-        [State('user-files-list', 'data'), State('edition-content', 'data'), State('tabs', 'value'), State("graph-data", "data")] 
+        [State('user-files-list', 'data'), State('edition-content', 'data'), State('tabs', 'value'), State("graph-data", "data"), State("synteny-genomes-all", "data")] 
     )
-    def extract_synteny_genomes(df_id, files, edits, active_tab, graph_data):
+    def extract_synteny_genomes(df_id, files, edits, active_tab, graph_data, genomes_all):
         print("\ncallback 3: extract_synteny_genomes()")                                         ########## DEBUG
-        if not df_id:
+        if not df_id or genomes_all:
             raise PreventUpdate
 
         df = load_dataframe(df_id, files, edits)
@@ -90,18 +111,19 @@ def register_left_panel_callbacks(app):
         # Initialize graph data for the active tab if it doesn't exist
         graph_data[active_tab] = {
             "genomes": {},
-            "synteny_lines": []
+            "synteny_lines": [],
+            "chr_connections": {}
         }
 
         genome_names = extract_genome_names(df)
         chromosome_names = {}
 
-        # Generate colors for each genome
-        palette = ["Tealgrn", "solar_r", "Plotly3_r"]
-        palette.extend(px.colors.named_colorscales())
+#        # Generate colors for each genome
+#        palette = ["Tealgrn", "solar_r", "Plotly3_r"]
+#        palette.extend(px.colors.named_colorscales())
 
         for ix, genome in enumerate(genome_names):
-            genome_data = process_chromosomes(df, genome, ix, palette[ix], spacing=0.2)
+            genome_data = process_chromosomes(df, genome)
             graph_data[active_tab]["genomes"][genome] = genome_data
             chromosomes = list(genome_data['chromosomes'].keys())
             chromosome_names[genome] = chromosomes
@@ -109,15 +131,33 @@ def register_left_panel_callbacks(app):
         synteny_lines = generate_synteny_lines(df, genome_names, graph_data[active_tab])
         graph_data[active_tab]["synteny_lines"] = synteny_lines
 
+        # Count synteny connections for each chromosome
+        chr_connections = graph_data[active_tab]["chr_connections"]
+        for line in synteny_lines:
+            genome_1, chr_1 = line["genome_1"], line["chr_1"]
+            genome_2, chr_2 = line["genome_2"], line["chr_2"]
+            chr_1_key = f"{genome_1}:{chr_1}"
+            chr_2_key = f"{genome_2}:{chr_2}"
+
+            chr_connections.setdefault(chr_1_key, {}).setdefault(genome_2, {"count": 0, "chromosomes": []})
+            chr_connections.setdefault(chr_2_key, {}).setdefault(genome_1, {"count": 0, "chromosomes": []})
+            chr_connections[chr_1_key][genome_2]["count"] += 1
+            chr_connections[chr_2_key][genome_1]["count"] += 1
+            if chr_2 not in chr_connections[chr_1_key][genome_2]["chromosomes"]:
+                chr_connections[chr_1_key][genome_2]["chromosomes"].append(chr_2)
+            if chr_1 not in chr_connections[chr_2_key][genome_1]["chromosomes"]:
+                chr_connections[chr_2_key][genome_1]["chromosomes"].append(chr_1)
+
         return [graph_data, genome_names, chromosome_names]
 
 
     # Creates the initial options for genome and chromosome selection
     @app.callback([Output('genome-draggable', 'children'), Output('genome-draggable', 'layout'),  Output('genome-draggable', 'gridCols'), Output("synteny-chromosome-selection", "children")],
                   [Input("synteny-genomes-all", "data")],
-                   State("synteny-chromosomes-all", "data")
+                  [State("synteny-chromosomes-all", "data"), State('synteny-genomes-selected', 'data'), State('synteny-chr-selected', 'data')], 
+                   prevent_initial_call = True
     )
-    def create_genome_selection(all_genomes, all_chromosomes):
+    def create_genome_selection(all_genomes, all_chromosomes, sel_genomes, sel_chr):
         print("\ncallback 4: create_genome_selection()")                                         ########## DEBUG
         if not all_genomes:
             raise PreventUpdate
@@ -129,7 +169,14 @@ def register_left_panel_callbacks(app):
             cards = []
             d = 3 if all(len(word) <= 6 for word in all_genomes) else 2 if all(len(word) <= 11 for word in all_genomes) else 1
             print("divider: ", d)                                                                ############ DEBUG
-            for i, genome in enumerate(all_genomes):
+
+            genomes = all_genomes
+#            genomes = all_genomes if not sel_genomes else sel_genomes[:]                           ########## UPDATE: keep genome order on page reload 
+#            if len(genomes) == len(sel_genomes) and len(genomes) < len(all_genomes):
+#                selected_set = set(sel_genomes)
+#                genomes.extend([item for item in all_genomes if item not in selected_set])
+
+            for i, genome in enumerate(genomes):
                 x = i % d           # alternates between 0 and 1 for two columns
                 y = i // d          # increments every two items for a new row
                 children.append(html.Div(dbc.Switch(id={'index': i, 'type': 'genome-switch-'}, label=genome, value=False, persistence=True, persistence_type="session", className=""), id=f"genome-switch-{i}"))
@@ -192,11 +239,13 @@ def register_left_panel_callbacks(app):
     # Returns ordered list of selected genomes, use it to update the plot
     @app.callback(Output('synteny-genomes-selected', 'data'),
                 [Input({'type': 'genome-switch-', 'index': ALL}, 'value'), Input('genome-draggable', 'layout')],
-                State("synteny-genomes-all", "data"),
-                prevent_initial_call = True
+                [State("synteny-genomes-all", "data"), State('synteny-genomes-selected', 'data')],
     )
-    def update_selected_genomes(switch_values, layout, genomes):
+    def update_selected_genomes(switch_values, layout, genomes, selected):
         print("\ncallback 5A: update_selected_genomes()")                                             ########## DEBUG
+#        print("    : ", switch_values, "\n", layout, "\n", genomes, "\n", selected)                   ########## DEBUG
+        ctx = callback_context.triggered
+        print("   triggered: ", get_triggered_info(ctx))
         if not switch_values:
             raise PreventUpdate
 
@@ -259,19 +308,19 @@ def register_left_panel_callbacks(app):
 
 
     # Generate synteny plot
-    @app.callback(
-        Output("graph", "figure"),
-        Input("synteny-genomes-selected", "data"),
-        [State('tabs', 'value'), State("graph-data", "data")]
+    @app.callback(Output("graph", "figure", allow_duplicate=True),
+                 [Input("synteny-genomes-selected", "data"), Input('synteny-chr-selected', 'data'),
+                  Input("synteny-chr-spacing", "value"), Input("synteny-chr-height", "value"), Input("synteny-chr-alignment", "value"), Input("synteny-line-position", "value"),  
+                 ],
+                 [State('tabs', 'value'), State("graph-data", "data")]
     )
-    def generate_synteny_graph(selected_genomes, active_tab, graph_data):
+    def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data):
         print("\ncallback 6: generate_synteny_graph()")                                         ########## DEBUG
         if not selected_genomes or not graph_data or active_tab not in graph_data:
             raise PreventUpdate
 
         tab_data = graph_data[active_tab]
-        bar_height = 3                      ####### UPDATE: pass as user selected value 
-
+        
         fig = go.Figure()
         # Add a dummy trace to force the use of y2 (displays total genome length)
         fig.add_trace(go.Scatter(x=[None], y=[None], showlegend=False, yaxis="y2"))
@@ -284,19 +333,53 @@ def register_left_panel_callbacks(app):
         # Update graph layout
         update_layout(fig, selected_genomes, tab_data, height=bar_height)
 
-        # Plot synteny lines for all neighboring genomes
-        line_traces = create_synteny_line_traces(tab_data["synteny_lines"], selected_genomes, genome_y_positions, tab_data, height=bar_height)
+        # Calculate and assign x-positions for chromosomes based on selection and ordering
+        chromosome_positions, x_range = assign_chromosome_positions(selected_genomes, selected_chromosomes, tab_data, alignment, spacing=spacing)
+
+        fig.update_xaxes(range=x_range)
+
+        # Plot synteny lines only for neighboring selected genomes
+        line_traces = create_bezier_synteny_lines(
+            tab_data["synteny_lines"],
+            selected_genomes,
+            selected_chromosomes,
+            chromosome_positions,
+            genome_y_positions,
+            position_mode=position_mode,
+            height=bar_height
+        )
         for trace in line_traces:
             fig.add_trace(trace)
 
-        # Plot chromosomes for each selected genome
+        # Plot chromosomes for each selected genome with proper colors
         for genome in selected_genomes:
             if genome in tab_data["genomes"]:
                 genome_data = tab_data["genomes"][genome]
-                chromosome_traces = create_chromosome_traces(genome, genome_data, genome_y_positions[genome], height=bar_height)
+                chromosomes_to_plot = selected_chromosomes.get(genome, genome_data["chromosomes"].keys())
+                chromosome_traces = create_chromosome_traces(
+                    genome, genome_data, chromosomes_to_plot, chromosome_positions, genome_y_positions[genome], graph_data, active_tab, height=bar_height
+                )
                 for trace in chromosome_traces:
                     fig.add_trace(trace)
 
         return fig
 
 
+    # Callback to update the graph layout using Patch
+    @app.callback(Output("graph", "figure", allow_duplicate=True),
+                 [Input('graph-title', 'value'), Input('X-title', 'value'), Input('Y-title', 'value')],
+                 prevent_initial_call = True
+    )
+    def update_graph_layout(title, xaxis_label, yaxis_label):
+        patch = Patch()
+        if title:
+            patch['layout']['title'] = title
+        if xaxis_label:
+            patch['layout']['xaxis']['title'] = xaxis_label
+        if yaxis_label:
+            patch['layout']['yaxis']['title'] = yaxis_label
+        
+        if patch:
+            return patch
+        else:
+            raise PreventUpdate
