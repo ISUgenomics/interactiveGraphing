@@ -21,6 +21,7 @@ external_scripts = [
 app = Dash(__name__, external_stylesheets=external_stylesheets, 
                      external_scripts=external_scripts, 
                      title="ActiGraph", update_title=None,
+                     prevent_initial_callbacks='initial_duplicate',
                      suppress_callback_exceptions=True
           )
 
