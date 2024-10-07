@@ -17,6 +17,13 @@ storage = html.Div([
 #  dcc.Store(id="graph-options-store", data={}, storage_type='session'),  # dict with keys of current graph tabs with values of all options for a given graph
   dcc.Store(id="graph-data", data={}, storage_type='session'),           # dict that stores graph data for each plotting tab; tab-id : {subset : df_data}
 
+# synteny
+  dcc.Store(id="synteny-genomes-all", data=[], storage_type='session'),
+  dcc.Store(id='synteny-genomes-selected', data=[], storage_type='session'),
+  dcc.Store(id='synteny-chromosomes-all', data={}, storage_type='session'),
+  dcc.Store(id='synteny-chr-selected', data=[], storage_type='session'),
+
+
   html.Button(id="edition-undo", children='', name="True", hidden=True, n_clicks=0)         # object that stores info for undo action
 ])
 
