@@ -1,4 +1,7 @@
+pandas
+numpy
 dash
 plotly
 dash-bootstrap-components
-pandas
+dash-table
+dash-draggabl
