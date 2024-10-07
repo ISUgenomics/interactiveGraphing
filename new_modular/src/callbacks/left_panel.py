@@ -310,9 +310,9 @@ def register_left_panel_callbacks(app):
     # Generate synteny plot
     @app.callback(Output("graph", "figure", allow_duplicate=True),
                  [Input("synteny-genomes-selected", "data"), Input('synteny-chr-selected', 'data'),
-                  Input("synteny-chr-spacing", "value"), Input("synteny-chr-height", "value"), Input("synteny-chr-alignment", "value"), Input("synteny-line-position", "value"),  
-                 ],
-                 [State('tabs', 'value'), State("graph-data", "data")]
+                  Input("synteny-chr-spacing", "value"), Input("synteny-chr-height", "value"), Input("synteny-chr-alignment", "value"), Input("synteny-line-position", "value")],
+                 [State('tabs', 'value'), State("graph-data", "data")],
+                 prevent_initial_call = True
     )
     def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data):
         print("\ncallback 6: generate_synteny_graph()")                                         ########## DEBUG
