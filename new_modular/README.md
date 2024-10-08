@@ -63,6 +63,24 @@ Contains specialized Python functions for data analysis and statistics.
 
 # How to Use This Project
 
-1. **Setup:** Install the required dependencies listed in `requirements.txt`.
-2. **Run the App:** Use `python run_app.py` to start the Dash server and run the application.
+**0.** Git clone the repo:
+```
+git clone https://github.com/ISUgenomics/interactiveGraphing.git
+```
+
+**1.** Create conda env:
+```
+conda create -n graphing python=3.12
+```
+
+**2.**  **Setup:** Install the required dependencies listed in `requirements.txt`.
+```
+pip install -r requirements.txt
+```
+
+**3.** **Run the App:** start the Dash server in a terminal and run the application
+```
+python run_app.py
+``` 
+
 3. **Explore the App:** Open any web browser and navigate to URL: `http://127.0.0.1:8085/`.
