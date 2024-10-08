@@ -4,4 +4,5 @@ dash
 plotly
 dash-bootstrap-components
 dash-table
-dash-draggabl
+dash-draggable
+matplotlib
