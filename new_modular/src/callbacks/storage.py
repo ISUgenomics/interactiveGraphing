@@ -4,7 +4,7 @@ import base64
 import json
 import pandas as pd
 import dash_bootstrap_components as dbc
-from dash import dcc, html, callback_context, no_update
+from dash import dcc, html, callback_context, no_update, Patch
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State, ALL, MATCH
 from src.params.variables import tooltip
@@ -16,20 +16,20 @@ def register_storage_callbacks(app):
 
     # [MANAGE FILES 1/4] The function creates a dict of user-loaded files that can be used for plotting; user-purged inputs are removed from memory
     @app.callback(Output('user-files-list', 'data'),
-                 [Input('upload-box', 'filename'), Input('upload-box', 'contents'), Input('download-btn', 'n_clicks'), Input('captured-name-store', 'data')],
-                 [State('custom-url', 'value'), State('user-files-list', 'data')],
+                 [Input({'id':'upload-box', 'tab': ALL}, 'filename'), Input({'id':'upload-box', 'tab': ALL}, 'contents'), Input({'id':"download-btn", 'tab': ALL}, 'n_clicks'), Input('captured-name-store', 'data')],
+                 [State({'id':"custom-url", 'tab': ALL}, 'value'), State('user-files-list', 'data'), State({'id':'upload-box', 'tab': ALL}, 'id')],
                   prevent_initial_call = True)
-    def create_input_list(files_box, contents_box, download_clicks, removed_input, url, files):
+    def create_input_list(files_box, contents_box, download_clicks, removed_input, urls, files, ids):
         print('0. update files list triggered')                                                                                #############  DEBUG
         print('0. removed input: ', removed_input)
         ctx = callback_context.triggered
-        
-#        if files is None:
-#            files = {}
-        
         if ctx:
             tnv = get_triggered_info(ctx)  # [type, name, value]
             print('0. CTX: ', tnv[0], ' ; ', tnv[1])                                                                          #############  DEBUG
+            index = next((i for i, d in enumerate(ids) if d['tab'] == tnv[0]), None)
+            fbox = files_box[index]
+            cbox = contents_box[index]
+            url = urls[index]
             
             # Handle remove button clicks
 #            print("0. HERE: ", remove_clicks, remove_ids)    #######
@@ -45,18 +45,18 @@ def register_storage_callbacks(app):
 #                return no_update
             
             # Handle file uploads
-            if files_box:
-                for num, i in enumerate(files_box):
+            if tnv[1] == 'upload-box' and fbox:
+                for num, i in enumerate(fbox):
                     if i != '' and i not in files:
                         try:
-                            content_type, content_string = contents_box[num].split(',')
+                            content_type, content_string = cbox[num].split(',')
                             files[str(i)] = content_string
                         except Exception as e:
                             print(f"Error processing upload content: {e}")
                 print('0. -by upload ', str(len(files)), files.keys())                                                         #############  DEBUG
                 
             # Handle URL-based file additions
-            if url:
+            elif url:
                 filename = url.strip().split('/')[-1]
                 if filename not in files:
                     try:
@@ -72,16 +72,17 @@ def register_storage_callbacks(app):
 
 
     # [MANAGE FILES 2/4] Display summary of loaded inputs
-    @app.callback([Output("settings-upload-label", "children"), Output("settings-upload-inputs", "children"), 
+    @app.callback([Output({'id':"settings-upload-label", 'tab': ALL}, "children"), Output({'id':"settings-upload-inputs", 'tab': ALL}, "children"), 
                    Output("user-files-status", "data")],
                   [Input("user-files-list", "data")],
-                  [State("user-files-list", "modified_timestamp"), State("inputs-clicks", 'data')])
-    def display_inputs_settings(loaded_files, time_stamp, counts):
+                  [State("user-files-list", "modified_timestamp"), State("inputs-clicks", 'data'), State({'id':"settings-upload-label", 'tab': ALL}, "children")],
+                  prevent_initial_call = True)
+    def display_inputs_settings(loaded_files, time_stamp, counts, items):
         print('1. display-inputs triggered')                                                                                    #############  DEBUG
         if not len(loaded_files):
             print('1. -no update')                                                                                              #############  DEBUG
-            return ["Please load inputs using available options.", [], time_stamp]
-        
+            return [["Please load inputs using available options."] * len(items), [[]] * len(items), time_stamp]
+    
         print('1. -update ', str(len(loaded_files)), '\n')  #, loaded_files                                                     #############  DEBUG
         info = "The following files were loaded: "
         inputs = []
@@ -90,24 +91,26 @@ def register_storage_callbacks(app):
                 n_clicks = counts.get(filename, 0) if counts else 0
                 file_size_kb = round(len(content) * (3 / 4) / 1000, 1)
                 item = html.Div([
-                    generate_html_label(f"- {filename}   ({file_size_kb} kB)", "col-8 d-inline"),
-                    generate_dbc_button(["edit ", html.I(className="fa fa-external-link")], {'type': "edit-", 'id': str(filename)}, n_clicks, "sm", True, "secondary", "ms-2 me-1 h34", style={'width': '20%'}),
-                    dbc.Tooltip(children=tooltip['edit-'], target={'type':"edit-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
-                    generate_dbc_button([html.I(className="fa fa-times")], f"remove-{str(filename)}", 0, "sm", True, "danger", "ms-1 me-2 h34 remove-inputs", style={'width':'0', 'flexGrow': '1'}),
-                    dbc.Tooltip(children=tooltip['remove-'], target={'type':"remove-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
+                    generate_html_label(f"- {filename}   ({file_size_kb} kB)", "col-8 p-0 me-3 d-inline"),
+                    html.Div([
+                        generate_dbc_button(["edit ", html.I(className="fa fa-external-link")], {'type': "edit-", 'id': str(filename)}, n_clicks, "sm", True, "secondary", "col-9 h34", style={}),
+                        dbc.Tooltip(children=tooltip['edit-'], target={'type':"edit-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
+                        generate_dbc_button([html.I(className="fa fa-times")], f"remove-{str(filename)}", 0, "sm", True, "danger", "col-3 h34 remove-inputs", style={}),
+                        dbc.Tooltip(children=tooltip['remove-'], target={'type':"remove-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
+                    ], className="col-4 row ps-1 pe-3"),
                 ], id=f"file-{str(filename)}", className="row ms-0 align-items-center d-flex") #{'type':"file-",'id': str(filename)}
                 inputs.append(item)
             except Exception as e:
                 print(f"Error processing file '{filename}': {e}")
 
-        return [info, inputs, time_stamp]
+        return [[info] * len(items), [inputs] * len(items), time_stamp]
 
 
     # [MANAGE FILES 3/4] Clear Upload Box (filename & contents)
     @app.callback(
-        [Output('upload-box', 'filename'), Output('upload-box', 'contents')],
+        [Output({'id':'upload-box', 'tab': MATCH}, 'filename'), Output({'id':'upload-box', 'tab': MATCH}, 'contents')],
         [Input("user-files-status", 'modified_timestamp')], 
-        [State('upload-box', 'last_modified')],
+        [State({'id':'upload-box', 'tab': MATCH}, 'last_modified')],
          prevent_initial_call = True)
     def clear_upload_form(list_stamp, upload_stamp):
         result = [no_update, no_update]
