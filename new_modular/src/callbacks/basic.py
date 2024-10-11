@@ -30,7 +30,7 @@ def register_basic_callbacks(app):
             matching_values = [tab['props']['tab_id'] for tab in tabs if keyword in tab['props'].get('tab_id', '')]
             if not matching_values:
                 return None
-            
+
             # Extract numerical suffixes from matching tab_id values
             suffixes = [int(value.split('_')[-1]) for value in matching_values if value.split('_')[-1].isdigit()]
             return max(suffixes) if suffixes else None
@@ -42,7 +42,7 @@ def register_basic_callbacks(app):
         new_tab = dbc.Tab(label=tab_name, id={'type':"app-tab-",'id': tab_name}, tab_id=f"tab-{tab_name}", class_name='index-tab')
         existing_tabs.append(new_tab)
 
-        left_content.append(html.Div(children=create_left_panel(tab_name), id={'type':"lopts-",'id': tab_name}, className='d-none')) 
+        left_content.append(html.Div(children=create_left_panel(tab_name), id={'type':"lopts-",'id': tab_name}, className='d-none'))
 
         return [existing_tabs, existing_tabs, left_content, left_content]
 
