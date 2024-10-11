@@ -1,10 +1,10 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from src.options.uploads import opts_inputs
-from src.options.analysis import opts_analysis
-from src.options.graph_general import opts_graph
-from src.options.graph_custom import opts_heatmap, opts_dendro, opts_bars
-from src.options.export import opts_config
+#from src.options.uploads import opts_inputs
+#from src.options.analysis import opts_analysis
+#from src.options.graph_general import opts_graph
+#from src.options.graph_custom import opts_heatmap, opts_dendro, opts_bars
+#from src.options.export import opts_config
 #from src.layout.options import left_panel
 #from src.layout.graphing import right_panel
 
