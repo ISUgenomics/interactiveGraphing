@@ -13,9 +13,6 @@ from src.functions.io import decode_base64, format_length
 from src.functions.widgets import get_triggered_info
 from src.functions.graph import load_dataframe, extract_genome_names, process_chromosomes, generate_synteny_lines, create_genome_options, assign_chromosome_positions, create_chromosome_traces, create_bezier_synteny_lines, update_layout 
 
-from src.options.analysis import synteny
-from src.options.graph_custom import opts_synteny
-
 def register_left_panel_callbacks(app):
     
     # color scale modal open-close
@@ -38,50 +35,12 @@ def register_left_panel_callbacks(app):
         return config
 
 
-    # Update Analysis settings options: display analysis settings for currently open graphing tab, e.g., synteny
-    @app.callback(Output("opts-analysis", "children"),
-                  Input('tabs', 'value'),
-                  State('opts-analysis', 'children'),
-    )
-    def update_analysis_opts(active_tab, content):
-        print("\ncallback 1: update_analysis_opts()")                                         ########## DEBUG
-        if active_tab == 'tab-home' or active_tab == 'tab-about':
-            raise PreventUpdate
-        else:
-            var_name = active_tab.split('_')[0].split('-')[1]
-            if content:
-                return content
-            elif var_name in globals():
-                return globals()[var_name]
-            else:
-                return html.Label(f"No analysis settings available for {var_name} plot type.", className="label-s")
-
-
-    # Update Custom Graph settings options: display analysis settings for currently open graphing tab, e.g., synteny
-    @app.callback(Output("opts-graph-cutom", "children"),
-                  Input('tabs', 'value'),
-                  State('opts-graph-cutom', 'children'),
-    )
-    def update_custom_graph_opts(active_tab, content):
-        print("\ncallback 1: update_custom_graph_opts()")                                         ########## DEBUG
-        if active_tab == 'tab-home' or active_tab == 'tab-about':
-            raise PreventUpdate
-        else:
-            var_name = active_tab.split('_')[0].split('-')[1]
-            if content:
-                return content
-            elif f"opts_{var_name}" in globals():
-                return globals()[f"opts_{var_name}"]
-            else:
-                return html.Label(f"No custom graph options available for {var_name} plot type.", className="label-s")
-
-
     # Update Analysis settings options: synteny input dropdown
     @app.callback(Output("synteny-inputs", "options"),
-                 [Input("opts-analysis", "children"), Input('user-files-list', 'data'), Input('edition-content', 'data'), ],
+                 [Input('user-files-list', 'data'), Input('edition-content', 'data'), ],
                  [State("synteny-inputs", "options"), State("synteny-inputs", "value")]
     )
-    def update_synteny_inputs(opts_analysis, files, edits, current, value):
+    def update_synteny_inputs(files, edits, current, value):
         print("\ncallback 2: update_synteny_inputs()")                                         ########## DEBUG
         df_ids = sorted(set(files.keys()).union(edits.keys()))
         if df_ids != current:
@@ -94,7 +53,7 @@ def register_left_panel_callbacks(app):
     @app.callback(
         [Output("graph-data", "data"), Output("synteny-genomes-all", "data"), Output("synteny-chromosomes-all", "data")],
          Input("synteny-inputs", "value"),
-        [State('user-files-list', 'data'), State('edition-content', 'data'), State('tabs', 'value'), State("graph-data", "data"), State("synteny-genomes-all", "data")] 
+        [State('user-files-list', 'data'), State('edition-content', 'data'), State('tabs', 'active_tab'), State("graph-data", "data"), State("synteny-genomes-all", "data")]
     )
     def extract_synteny_genomes(df_id, files, edits, active_tab, graph_data, genomes_all):
         print("\ncallback 3: extract_synteny_genomes()")                                         ########## DEBUG
@@ -311,13 +270,17 @@ def register_left_panel_callbacks(app):
     @app.callback(Output("graph", "figure", allow_duplicate=True),
                  [Input("synteny-genomes-selected", "data"), Input('synteny-chr-selected', 'data'),
                   Input("synteny-chr-spacing", "value"), Input("synteny-chr-height", "value"), Input("synteny-chr-alignment", "value"), Input("synteny-line-position", "value")],
-                 [State('tabs', 'value'), State("graph-data", "data")],
+                 [State('tabs', 'active_tab'), State("graph-data", "data")],
                  prevent_initial_call = True
     )
     def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data):
         print("\ncallback 6: generate_synteny_graph()")                                         ########## DEBUG
-        if not selected_genomes or not graph_data or active_tab not in graph_data:
+        ctx = callback_context
+        if not ctx.triggered or not selected_genomes or not graph_data or active_tab not in graph_data:
             raise PreventUpdate
+
+        tnv = get_triggered_info(ctx)  # [type, name, value]
+        print('    triggered: ', tnv[1])                                                                          #############  DEBUG
 
         tab_data = graph_data[active_tab]
         
