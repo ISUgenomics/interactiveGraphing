@@ -40,3 +40,14 @@ def register_clientside_callbacks(app):
         Output('void2', 'value'),
         [Input('edition-items', 'children')]
     )
+    
+        # style and move DataTable buttons
+#    app.clientside_callback(
+#        """
+#        function(content) {
+#            return window.dash_clientside.clientside.setValue(content);
+#        }
+#        """,
+#        Output('captured-name-store', 'data'),
+#        [Input('settings-upload-inputs', 'children')]
+#    )
