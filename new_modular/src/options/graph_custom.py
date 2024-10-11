@@ -7,7 +7,7 @@ from src.functions.widgets import generate_pop_up_modal
 
 # 4. CUSTOMIZED OPTIONS FOR SELECTED PLOT TYPE
 
-## A. CUSTOMIZE HEATMAP
+## D. CUSTOMIZE HEATMAP
 
 modal_body = html.Div([
     html.Div([dcc.Graph(figure=CS_SEQ)], className='d-inline w33'), 
@@ -200,44 +200,62 @@ opts_dendro = [
 ]
 
 
-## C. CUSTOMIZE CLUSTER BARS
+## D. CUSTOMIZE CLUSTER BARS
 
 opts_bars = [
 
 ]
 
 
-## C. CUSTOMIZE SYNTENY PLOT
+## D. CUSTOMIZE SYNTENY PLOT
 
-opts_synteny = [
-    # Chromosome Spacing
-    html.Div([
-        html.Label('chr spacing:', className='col-4 d-inline label-s', title="Adjust spacing between chromosomes"),
-        dcc.Input(id="synteny-chr-spacing", type="number", min=0.001, max=0.5, step=0.001, placeholder="Enter spacing", value=0.01, debounce=True, className='col-8'),
-    ], className="row align-items-center pe-2 h34"),
+# Chromosome setup: spacing, hight, corner-radius
+def create_synteny_chromosome(tab_name):
+    return [
+        html.Div([
+          html.Label('position:', className='col-2 me-3 d-inline label-s', title="Choose alignment mode"),
+          dcc.Dropdown(id={'id':"synteny-chr-alignment", 'tab': tab_name}, options = [{'label': value, 'value': value} for value in ['left', 'right', 'center', 'block']], value='center', className='col-6', clearable=False, style=drop50),
+          html.Label('spacing:', className='col-2 me-3 d-inline label-s', style={"margin-left" : "-6em"}, title="Adjust spacing between chromosomes"),
+          dcc.Input(id={'id':"synteny-chr-spacing", 'tab': tab_name}, type="number", min=0.001, max=0.5, step=0.001, placeholder="Enter spacing", value=0.01, debounce=True, className='col-3'),
+          html.Label('height:', className='col-2 me-3 d-inline label-s', title="Adjust height of chromosomes"),
+          dcc.Input(id={'id':"synteny-chr-height", 'tab': tab_name}, type="number", min=0.5, max=19, step=0.1, placeholder="Enter height", value=3, debounce=True, className='col-3 mt-1'),
+        ], className="row align-items-center"),
+    ]
 
-    # Chromosome Height
-    html.Div([
-        html.Label('chr height:', className='col-4 d-inline label-s', title="Adjust height of chromosomes"),
-        dcc.Input(id="synteny-chr-height", type="number", min=0.5, max=19, step=0.1, placeholder="Enter height", value=3, debounce=True, className='col-8'),
-    ], className="row align-items-center mt-2 pe-2 h34"),
+# Synteny line setup: start-end position on chromosome
+def create_synteny_line(tab_name):
+    return [
+        html.Div([
+            html.Label('position:', className='col-4 d-inline label-s', title="Choose position mode for chromosomes"),
+            dcc.RadioItems(['exact', 'middle'], value='exact', id={'id':"synteny-line-position", 'tab': tab_name}, inline=True, className="col-8 p-0", labelClassName="ms-0 me-3"),
+        ], className="row align-items-center mt-2 pe-2 h34 w-100"),
+    ]
 
-    # Alignment Selection
-    html.Div([
-        html.Label('chr align:', className='col-4 d-inline label-s', title="Choose alignment mode"),
-        dcc.Dropdown(id="synteny-chr-alignment", options = [{'label': value, 'value': value} for value in ['left', 'right', 'center', 'block']], 
-            value='center', className='col-8', clearable=False,
-        ),
-    ], className="row align-items-center mt-2 pe-2 mb-4 h34"),
+# Synteny ribbon setup:
+def create_synteny_ribbon(tab_name):
+    return []
 
-    # Position Mode Selection
-    html.Div([
-        html.Label('synteny position:', className='col-4 d-inline label-s', title="Choose position mode for chromosomes"),
-        dcc.RadioItems(['exact', 'middle'], value='exact', id="synteny-line-position", inline=True, className='col-8'),
-    ], className="row align-items-center mt-2 pe-2 h34"),    
-]
+# Synteny graph options assembly
+def create_opts_graph_synteny(tab_name):
+    return [
+      html.Div([
+        dbc.Accordion([
+          dbc.AccordionItem(create_synteny_chromosome(tab_name), title="CHROMOSOME", item_id="graph-synteny-1"),
+          dbc.AccordionItem(create_synteny_line(tab_name), title="SYNTENY LINES", item_id="graph-synteny-2"),
+          dbc.AccordionItem(create_synteny_ribbon(tab_name), title="SYNTENY RIBBON", item_id="graph-3"),
+        ], id={'id':"graph-custom-synteny", 'tab': tab_name}, class_name='accordion2 p-0', start_collapsed=True, always_open=True, flush=False, className='w-100 p-0'),
+      ], className="row align-items-center mt-1"),
+    ]
+
 
 ### -------------------------------------- ###
 
 # Final assembly of custom graph settings
-opts_graph_types = html.Div(id="opts-graph-cutom")
+
+def create_opts_graph_custom(tab_name):
+    variant = tab_name.split('_')[0]
+    function_name = f'create_opts_graph_{variant}'
+    if function_name in globals():
+        return [html.Div(id={'id':"opts-analysis", 'tab': tab_name}, children = globals()[function_name](variant))]
+    else:
+        return [html.Div(id={'id':"opts-analysis", 'tab': tab_name}, children = html.Div(f"No options available for {variant} graph."))]
