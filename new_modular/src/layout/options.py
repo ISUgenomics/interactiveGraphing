@@ -1,22 +1,20 @@
 from dash import html
 import dash_bootstrap_components as dbc
-from src.params.styles import *
-from src.options.uploads import opts_inputs
-from src.options.analysis import opts_analysis
-from src.options.graph_general import opts_graph
-from src.options.graph_custom import opts_graph_types
-from src.options.export import opts_config
+from src.options.uploads import create_opts_inputs
+from src.options.analysis import create_opts_analysis
+from src.options.graph_general import create_graph_options
+from src.options.graph_custom import create_opts_graph_custom
+from src.options.export import create_opts_export_config
 
-left_panel = html.Div([
-    html.Button('Show Options', id='options', n_clicks=0, style=css_btn),
-    html.Div(id='optionsDiv', children=[
+
+def create_left_panel(tab_name):
+    return [
         dbc.Accordion([
-            dbc.AccordionItem(opts_inputs, title="1. UPLOAD INPUTS", item_id="item-1"),
-            dbc.AccordionItem(opts_analysis, title="2. ADJUST ANALYSIS SETTINGS", item_id="item-2"),
-            dbc.AccordionItem(opts_graph, title="3. GENERAL GRAPH SETTINGS", item_id="item-3"),
-            dbc.AccordionItem(opts_graph_types, title="4. SPECIFIC GRAPH SETTINGS", item_id="item-4"),
-            dbc.AccordionItem(opts_config, title="5. EXPORT GRAPH", item_id="item-5", class_name=".container")            
-        ], id="accordion", always_open=True, flush=False, start_collapsed=True), #,active_item="item-4"
+            dbc.AccordionItem(create_opts_inputs(tab_name), title="1. UPLOAD INPUTS", item_id="item-1"),
+            dbc.AccordionItem(create_opts_analysis(tab_name), title="2. ADJUST ANALYSIS SETTINGS", item_id="item-2"),
+            dbc.AccordionItem(create_graph_options(tab_name), title="3. GENERAL GRAPH SETTINGS", item_id="item-3"),
+            dbc.AccordionItem(create_opts_graph_custom(tab_name), title="4. SPECIFIC GRAPH SETTINGS", item_id="item-4"),
+            dbc.AccordionItem(create_opts_export_config(tab_name), title="5. EXPORT GRAPH", item_id="item-5", class_name=".container")
+        ], id="accordion", always_open=True, flush=False, start_collapsed=True),
         html.Div(id="accordion-contents", className="mt-3"),
-    ], style={'marginRight': '1px', 'width': '100%'})
-], id='left-panelDiv', style=css_lpd)
+    ]
