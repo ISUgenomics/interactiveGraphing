@@ -17,14 +17,17 @@ function CloseItem(el) {
 }
 
 // F1: Mutation Observer to watch for changes in the element style
+// F2: Listener for clicks on for "remove-" buttons to remove loaded inputs and release memory
 function observeStyleChanges() {
+    console.log("observeStyleChanges() called");
+
     var buttons = document.querySelectorAll('.dt-buttons');
     var observerCallback = function(mutationsList) {
         for (var mutation of mutationsList) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                 var targetElement = mutation.target;
                 if (targetElement.style.display === 'none') {
-                    window.dash_clientside.clientside.MoveDataTableButtons();
+                    window.dash_clientside.clientside.moveDataTableButtons();
                 }
             }
         }
@@ -35,7 +38,44 @@ function observeStyleChanges() {
         var observer = new MutationObserver(observerCallback);
         observer.observe(button, observerOptions);
     });
+
+    // 2) Function to handle 'remove-' button clicks
+    function handleButtonClick(event) {
+        const button = event.target;
+        const buttonId = button.id;
+        console.log('Button clicked:', buttonId);                                     // DEBUG
+
+        // Find the parent div with an ID starting with "file-"
+        const parentDiv = button.closest('div[id^="file-"]');
+        if (parentDiv) {
+            // Remove the parent div from the DOM
+            parentDiv.remove();
+
+            // Extract and return the part of the parent ID after "file-"
+            const fileIdPart = parentDiv.id.substring('file-'.length);
+            console.log('Removed file ID:', fileIdPart);
+            return fileIdPart;
+        } else {
+            console.log('No parent div found for button:', buttonId);
+        }
+        return '';
+    }
+
+    let captured_name = '';
+    var btns = document.querySelectorAll('.remove-inputs');
+        console.log("Found remove buttons:", btns);
+    btns.forEach(button => {
+        button.addEventListener('click', function(event) {
+            captured_name = handleButtonClick(event);
+            console.log('Captured file name:', captured_name);
+//            if (captured_name) {
+//                window.dash_clientside.clientside.setValue('captured-name-store', captured_name);
+//            }
+        });
+    });
 }
+
+
 
 // SECTION 2: MAIN FUNCTION WITH CALLBACKS
 
@@ -45,21 +85,44 @@ function observeStyleChanges() {
 
         // F0: Function to toggle options panel
         toggleOptionsPanel: function(n_clicks) {
+            console.log("toggleOptionsPanel: ", n_clicks); // DEBUG
             var x = document.getElementById("optionsDiv");
             var y = document.getElementById("options");
             var z = document.getElementById("left-panelDiv");
+            var tabs = document.getElementsByClassName("tab-fixed");
+            if (!x || !y || !z) {
+                return {display: "none"};
+            }
+
             if (x.style.display === "none") {
                 x.style.display = "block";
                 y.style.backgroundColor = "#D6F2FA";
                 y.style.color = "#90B6C1";
                 y.innerText = "✕";
+                z.style.minWidth = "198px";
                 z.style.width = "25vw";
+
+                var viewportWidth = window.innerWidth;
+                var computedStyle = window.getComputedStyle(z);
+                var newWidth = ((parseFloat(computedStyle.width) - 36) / 2);
+                var newWidthVw = (newWidth / viewportWidth) * 100;
+                width = newWidthVw + 'vw'
+                for (var i = 0; i < tabs.length; i++) {
+                    tabs[i].style.setProperty('width', width, 'important');
+                }
+
             } else {
+                console.log("set default width....");
                 x.style.display = "none";
                 y.style.backgroundColor = "#008CBA";
                 y.style.color = "white";
                 y.innerText = "≡";
+                z.style.minWidth = "37px";
                 z.style.width = "37px";
+
+                for (var i = 0; i < tabs.length; i++) {
+                    tabs[i].style.setProperty('width', '120px', 'important');
+                }
             }
             return {display: x.style.display}; // Return an object for Dash compatibility
         },
@@ -125,7 +188,19 @@ function observeStyleChanges() {
             }
             observeStyleChanges(); // Ensure this is called to observe changes
             return '';
-        }
+        },
+
+        // Helper function to update the Dash Store
+/*        setValue: function(storeId, value) {
+            console.log("store var: ", storeId, value);
+            const storeElement = document.getElementById(storeId);
+            var storeElement = sessionStorage.getItem(storeId);
+            console.log(storeElement);
+            if (storeElement) {
+                storeElement = value;
+                console.log(`Setting value for ${storeId}: ${value}`, storeElement);
+            }
+        }*/
 
         // next function goes here; add comma above!
 
@@ -139,7 +214,7 @@ window.onload = function() {
         // Call not globally accessible functions:
         if (window.dash_clientside && window.dash_clientside.clientside) {
             window.dash_clientside.clientside.toggleOptionsPanel();
-            window.dash_clientside.clientside.MoveDataTableButtons();
+            window.dash_clientside.clientside.moveDataTableButtons();
         }
 
         // Call globally accessible functions:
