@@ -1,3 +1,4 @@
+import importlib
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from src.params.styles import *
@@ -40,7 +41,8 @@ data_inputs = html.Div([
 ], id='upper-panelDiv', className="resize-vertical", style={'minHeight':'fit-content', 'maxHeight':'100vh'}) #, 'height':'fit-content'
 
 # DISPLAY INTERACTIVE SECTION
-graph_analysis = html.Div(id='graph-panelDiv', children=[dcc.Graph(id='graph')])
+graph_analysis = html.Div(id='graph-panelDiv')
+
 # EXTRACT OUTPUT DATA SECTION
 data_outputs = html.Div(id='lower-panelDiv')
 
@@ -50,9 +52,9 @@ data_outputs = html.Div(id='lower-panelDiv')
 right_panel = html.Div([
   html.Div([
     dbc.Accordion([
-      dbc.AccordionItem(data_inputs, title="EDIT INPUT DATA", item_id="item-11", ), # style={'display':'none'} ## JS management
-      dbc.AccordionItem(graph_analysis, title="DISPLAY INTERACTIVE GRAPHS", item_id="item-12", ), # style={'display':'none'} ## JS management
-      dbc.AccordionItem(data_outputs, title="EXTRACT OUTPUT DATA", item_id="item-13", ), # style={'display':'none'} ## JS management
+      dbc.AccordionItem(data_inputs, title="EDIT INPUT DATA", item_id="item-11", ),
+      dbc.AccordionItem(graph_analysis , title="DISPLAY INTERACTIVE GRAPHS", item_id="item-12", ),
+      dbc.AccordionItem(data_outputs, title="EXTRACT OUTPUT DATA", item_id="item-13", ),
     ], id="accordion2", start_collapsed=True, always_open=True, flush=False), 
   ], id='app-bodyDiv')
 ], id='right-panelDiv', style=css_rpd)
