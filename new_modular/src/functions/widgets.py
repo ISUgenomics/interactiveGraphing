@@ -2,7 +2,7 @@ import pandas as pd
 from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
 from src.params.styles import *
-from src.params.variables import tooltip
+from src.params.defaults import tooltip
 
 
 COL_PROPS={'renamable':True, 'editable':True, 'hideable':True, 'selectable':True, 'clearable':True, 'deletable':True}
@@ -25,6 +25,10 @@ def generate_color_options(value_list):
 
 def generate_html_label(text, cname='d-block', style=css_lab):
     return html.Label(children=str(text), className=cname, style=style)
+
+
+def generate_dcc_input_scroll(text, cname=''):
+    return dcc.Input(value=str(text), className=cname, type='text', disabled=True, persistence=True, persistence_type='session')
 
 
 def generate_dbc_button(text, identifier, n_clicks=0, size="sm", outline=True, color="secondary", cname="align-top w-50 h34", style=None, disabled=False):
