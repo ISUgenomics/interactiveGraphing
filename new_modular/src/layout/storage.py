@@ -4,7 +4,9 @@ from src.params.generic import CONFIG
 
 storage = html.Div([
   dcc.Store(id="add-app-tab-num", data=[], storage_type='session'),      # children of the app Tabs
-  dcc.Store(id='left-panel-children', data=[], storage_type='session'),
+  dcc.Store(id='left-panel-children', data=[], storage_type='session'),  # all options panels; visible only the one for the active tab
+  dcc.Store(id='graph-panel-children', data=[], storage_type='session'), # all graph panels; visible only the one for the active tab
+  dcc.Store(id='output-panel-children', data=[], storage_type='session'),# all output data panels; visible only the one for the active tab
   dcc.Store(id="data-dir", data=str(Path.cwd().parent / "data"), storage_type='session'),
   dcc.Store(id="user-files-list", data={}, storage_type='session'),      # dict of currently loaded inputs {name: base64 content}
   dcc.Store(id="user-files-status", data='', storage_type='session'),    # time_stamp triggering the emptying of the upload box
@@ -15,14 +17,13 @@ storage = html.Div([
   dcc.Store(id='captured-name-store', data='', storage_type='session'),
   dcc.Store(id='draggable-layout', data={}, storage_type='session'), 
   dcc.Store(id="graph-config", data=CONFIG, storage_type='session'),     # current config of built-in interactive tools in the graph
-#  dcc.Store(id="graph-options-store", data={}, storage_type='session'),  # dict with keys of current graph tabs with values of all options for a given graph
   dcc.Store(id="graph-data", data={}, storage_type='session'),           # dict that stores graph data for each plotting tab; tab-id : {subset : df_data}
 
 # synteny
   dcc.Store(id="synteny-genomes-all", data=[], storage_type='session'),
   dcc.Store(id='synteny-genomes-selected', data=[], storage_type='session'),
   dcc.Store(id='synteny-chromosomes-all', data={}, storage_type='session'),
-  dcc.Store(id='synteny-chr-selected', data=[], storage_type='session'),
+  dcc.Store(id='synteny-chr-selected', data={}, storage_type='session'),
 
 
   html.Button(id="edition-undo", children='', name="True", hidden=True, n_clicks=0)         # object that stores info for undo action
