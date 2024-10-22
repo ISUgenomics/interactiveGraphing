@@ -9,10 +9,12 @@ from src.functions.io import decode_base64, format_length
 
 
 def load_dataframe(df_id, files, edits):
-    if '#' in df_id:
-        return pd.DataFrame.from_dict(edits[df_id['data']])
-    else:
+    if '#' in df_id and df_id in edits:
+        return pd.DataFrame.from_dict(edits[df_id].get('data', {}))
+    elif df_id in files:
         return decode_base64(df_id, files[df_id])
+    else:
+        raise KeyError(f"Key '{df_id}' not found.")
 
 
 def split_text_by_length(text, max_length=200, delimiter=", "):
