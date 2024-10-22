@@ -7,9 +7,9 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html, callback_context, no_update, Patch
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State, ALL, MATCH
-from src.params.variables import tooltip
+from src.params.defaults import tooltip
 from src.functions.io import decode_base64, export_df
-from src.functions.widgets import get_triggered_info, generate_html_label, generate_dbc_button
+from src.functions.widgets import get_triggered_info, generate_html_label, generate_dbc_button, generate_dcc_input_scroll
 
 
 def register_storage_callbacks(app):
@@ -91,7 +91,7 @@ def register_storage_callbacks(app):
                 n_clicks = counts.get(filename, 0) if counts else 0
                 file_size_kb = round(len(content) * (3 / 4) / 1000, 1)
                 item = html.Div([
-                    generate_html_label(f"- {filename}   ({file_size_kb} kB)", "col-8 p-0 me-3 d-inline"),
+                    generate_dcc_input_scroll(f"- {filename}   ({file_size_kb} kB)", "col-8 p-0 me-3 d-inline border-0"),
                     html.Div([
                         generate_dbc_button(["edit ", html.I(className="fa fa-external-link")], {'type': "edit-", 'id': str(filename)}, n_clicks, "sm", True, "secondary", "col-9 h34", style={}),
                         dbc.Tooltip(children=tooltip['edit-'], target={'type':"edit-",'id': str(filename)}, placement='bottom-start', style={'width': '400px'}),
