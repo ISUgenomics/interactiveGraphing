@@ -46,7 +46,7 @@ def register_left_panel_callbacks(app):
         if not key in config:
             config[key] = CONFIG
         config[key]['toImageButtonOptions'] = {'format': str(imgtype[ix]), 'filename': str(name[ix]), 'height': int(height[ix]), 'width': int(width[ix]),  'scale': float(scale[ix])}
-        config['changed'] = key
+        config['@changed'] = key
         return config
 
 
@@ -76,27 +76,20 @@ def register_left_panel_callbacks(app):
         print("\ncallback 3: extract_synteny_genomes()")                                         ########## DEBUG
         try:
             active_tab = active_tab.split('-')[-1]
-            print("triggered: ", callback_context.triggered)                                    ########## DEBUG
             tnv = get_triggered_info(callback_context.triggered)
-            print(active_tab, tnv[0], tnv[1], tnv[2], len(items))                                                       ########## DEBUG
             key = tnv[0]
             if active_tab != key:
-                print('   prevent update 0')                                                        ######### DEBUG
                 raise PreventUpdate
             ix = get_triggered_index(items, value=tnv[0])
-            print(key, " : ", ix)                                                               ######### DEBUG
             df_id = df_ids[ix]
         except:
-            print('   prevent update 1')                                                        ######### DEBUG
             raise PreventUpdate
 
         if not df_id: #or genomes_all[key]:     # if not data siurce selected
-            print('   prevent update 2')                                                        ######### DEBUG
             raise PreventUpdate
 
         df = load_dataframe(df_id, files, edits)
         if df.empty:
-            print('   prevent update 3')                                                        ######### DEBUG
             raise PreventUpdate
 
         if not key in graph_data:
@@ -143,7 +136,7 @@ def register_left_panel_callbacks(app):
                 chr_connections[chr_1_key][genome_2]["chromosomes"].append(chr_2)
             if chr_1 not in chr_connections[chr_2_key][genome_1]["chromosomes"]:
                 chr_connections[chr_2_key][genome_1]["chromosomes"].append(chr_1)
-        print(genomes_all)                                                                                   ######## DEBUG
+#        print(genomes_all)                                                                                   ######## DEBUG
         return [graph_data, genomes_all, chr_all]
 
 
@@ -162,7 +155,7 @@ def register_left_panel_callbacks(app):
             raise PreventUpdate
 
         ix = get_triggered_index(items, value=active_tab)
-        print(ix, " : ", len(items))                                                                ######## DEBUG
+#        print(ix, " : ", len(items))                                                                ######## DEBUG
         if 0 <= ix < len(items):
             output = [no_update] * len(items)
             layout = []
@@ -171,7 +164,7 @@ def register_left_panel_callbacks(app):
             buttons = []
             cards = []
             d = 3 if all(len(word) <= 6 for word in all_genomes[active_tab]) else 2 if all(len(word) <= 11 for word in all_genomes[active_tab]) else 1
-            print("divider: ", d)                                                                ############ DEBUG
+#            print("divider: ", d)                                                                ############ DEBUG
 
             genomes = all_genomes[active_tab]
 #            genomes = all_genomes if not sel_genomes else sel_genomes[:]                           ########## UPDATE: keep genome order on page reload 
@@ -203,7 +196,7 @@ def register_left_panel_callbacks(app):
                     dbc.Collapse(html.Div(cards), id="collapse", is_open=True,),
             ], className="w-100")
             chr_opts.append(collapse)
-            print("    children len: ", len(children))                                                              ########## DEBUG
+#            print("    children len: ", len(children))                                                              ########## DEBUG
 
             children_all, layout_all, d_all, chr_opts_all = [output.copy() for _ in range(4)]
             children_all[ix] = children
@@ -221,7 +214,6 @@ def register_left_panel_callbacks(app):
     def toggle_cards(n_clicks, genome_btns):
         print("\ncallback: toggle_cards()", callback_context.triggered)                                                              ########## DEBUG
         gtd = get_triggered_dict(callback_context.triggered)
-        print(gtd, n_clicks)
         if 'close-collapse' in {gtd.get('type'), gtd.get('id')} and n_clicks > 0:
             return False
         else:
@@ -247,22 +239,36 @@ def register_left_panel_callbacks(app):
 
     # Returns ordered list of selected genomes, use it to update the plot
     @app.callback(Output('synteny-genomes-selected', 'data'),
-                [Input({'type': 'genome-switch-', 'index': ALL}, 'value'), Input({'id':'genome-draggable', 'tab':ALL}, 'layout')],
-                [State("synteny-genomes-all", "data"), State('synteny-genomes-selected', 'data')],
+                [Input({'type': 'genome-switch-', 'index': ALL, 'tab': ALL}, 'value'), Input({'id':'genome-draggable', 'tab':ALL}, 'layout')],
+                [State("synteny-genomes-all", "data"), State('synteny-genomes-selected', 'data'), State('tabs', 'active_tab')],
     )
-    def update_selected_genomes(switch_values, layout, genomes, selected):
+    def update_selected_genomes(switchers, layouts, genomes, selected_genomes, active_tab):
         print("\ncallback 5A: update_selected_genomes()")                                             ########## DEBUG
-#        print("    : ", switch_values, "\n", layout, "\n", genomes, "\n", selected)                   ########## DEBUG
-        ctx = callback_context.triggered
-        print("   triggered: ", get_triggered_info(ctx))
-        if not switch_values:
+        active_tab = active_tab.split('-')[-1]
+        gtd = get_triggered_dict(callback_context.triggered)
+#        print("triggered: ", gtd)                                                                    ########## DEBUG
+        if gtd.get('tab') != active_tab or not switchers:
             raise PreventUpdate
 
-        selected_genomes = []
+        genomes = genomes[active_tab]
+        switch_values = []
+        layout = []
+        # Loop over inputs and filter them based on the active tab
+        for input_group in callback_context.inputs_list:
+            for i, input_item in enumerate(input_group):
+                input_id = input_item['id']
+                
+                # Filter genome-switch- based on the active tab
+                if 'type' in input_id and input_id['type'] == 'genome-switch-' and input_id['tab'] == active_tab:
+                    switch_values.append(input_item['value'])
 
-        print("    layout input: ", layout)                                                          ########## DEBUG
-        print("    switch values: ", switch_values)                                                  ########## DEBUG
+                # Filter genome-draggable layout based on the active tab
+                elif 'id' in input_id and input_id['id'] == 'genome-draggable' and input_id['tab'] == active_tab:
+                    layout = input_item['value']
 
+#        print("    layout input: ", layout)                                                          ########## DEBUG
+#        print("    switch values: ", switch_values)                                                  ########## DEBUG
+        selected = []
         # Sort by 'y' first, then by 'x' to get the correct order
         sorted_layout = sorted(layout, key=lambda item: (item['y'], item['x']))
 
@@ -271,26 +277,48 @@ def register_left_panel_callbacks(app):
             if match:
                 idx = int(match.group())
                 if switch_values[idx]:
-                    selected_genomes.append(genomes[idx])
-
+                    selected.append(genomes[idx])
+        selected_genomes[active_tab] = selected if selected else []
+        selected_genomes['@changed'] = active_tab
         print("    genomes order: ", selected_genomes)                                                ########### DEBUG        
-        return selected_genomes if selected_genomes else []
+        return selected_genomes
 
 
     # Returns ordered list of selected chromosomes, use it to update the plot
     @app.callback(Output('synteny-chr-selected', 'data'),
-                [Input({'type': 'chr-switch-', 'index': ALL, 'id': ALL}, 'value'), Input({'type':'chr-draggable', 'id': ALL}, 'layout')],
+                [Input({'type': 'chr-switch-', 'index': ALL, 'id': ALL, 'tab': ALL}, 'value'), Input({'type':'chr-draggable', 'id': ALL, 'tab': ALL}, 'layout')],
                 [State("synteny-chromosomes-all", "data"), State("synteny-genomes-all", "data"), State('synteny-chr-selected', 'data'), State('tabs', 'active_tab')],
-                prevent_initial_call = True
+#                prevent_initial_call = True
     )
-    def update_selected_chromosomes(switch_values, layout, chromosomes_all, genomes_all, selected_chromosomes, active_tab):
+    def update_selected_chromosomes(switchers, layouts, chromosomes_all, genomes_all, selected_chromosomes, active_tab):
         print("\ncallback 5B: update_selected_chromosomes()")                                             ########## DEBUG
         active_tab = active_tab.split('-')[-1]
+        gtd = get_triggered_dict(callback_context.triggered)
+        if gtd.get('tab') != active_tab:
+            raise PreventUpdate
         try:
-            chromosomes_all = chromosomes_all[active_tab]
             genomes_all = genomes_all[active_tab]
+            chromosomes_all = chromosomes_all[active_tab]
         except:
             raise PreventUpdate
+
+        switch_values = []
+        layout = []
+#        print(callback_context.inputs_list)
+        for input_group in callback_context.inputs_list:
+            for i, input_item in enumerate(input_group):
+                input_id = input_item['id']
+                
+                # Filter genome-switch- based on the active tab
+                if 'type' in input_id and input_id['type'] == 'chr-switch-' and input_id['tab'] == active_tab:
+                    switch_values.append(input_item['value'])
+
+                # Filter genome-draggable layout based on the active tab
+                elif 'type' in input_id and input_id['type'] == 'chr-draggable' and input_id['tab'] == active_tab:
+                    layout.append(input_item['value'])
+
+#        print(switch_values)
+#        print(layout)
 
         if not switch_values or len(genomes_all) != len(layout):
             raise PreventUpdate
@@ -318,8 +346,9 @@ def register_left_panel_callbacks(app):
                     if switches[idx]:
                         selected_chr[genome].append(chromosomes[idx])
 
-            print("    genomes order: ", genome, len(selected_chr[genome]), selected_chr[genome])                                                ########### DEBUG        
+#            print("    chr order: ", genome, len(selected_chr[genome]), selected_chr[genome])                                                ########### DEBUG        
         selected_chromosomes[active_tab] = selected_chr
+        selected_chromosomes['@changed'] = active_tab
         return selected_chromosomes
 
 
@@ -329,23 +358,31 @@ def register_left_panel_callbacks(app):
                  [Input("synteny-genomes-selected", "data"), Input('synteny-chr-selected', 'data'),
                   Input({'id':"synteny-chr-spacing", 'tab':MATCH}, "value"), Input({'id':"synteny-chr-height", 'tab':MATCH}, "value"), 
                   Input({'id':"synteny-chr-alignment", 'tab':MATCH}, "value"), Input({'id':"synteny-line-position", 'tab':MATCH}, "value")],
-                 [State('tabs', 'active_tab'), State("graph-data", "data")],
+                 [State('tabs', 'active_tab'), State("graph-data", "data"), State({'id':"graph", 'tab':MATCH}, "id")],
                  prevent_initial_call = True
     )
-    def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data):
-        print("\ncallback 6: generate_synteny_graph()")                                         ########## DEBUG
+    def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data, graph_id):
+        print("\ncallback 6: generate_synteny_graph()")                                                      ########## DEBUG
         active_tab = active_tab.split('-')[-1]
-        ctx = callback_context
-        if not ctx.triggered or not selected_genomes or not graph_data or active_tab not in graph_data:
+        if active_tab != graph_id.get('tab'):
+            raise PreventUpdate
+        gtd = get_triggered_dict(callback_context.triggered)
+#        print("active tab: ", active_tab)                                                                    ########## DEBUG
+#        print("graph id: ", graph_id.get('tab'))                                                             ########## DEBUG
+#        print("triggered: ", gtd)                                                                            ########## DEBUG
+
+        try:
+            selected_genomes = selected_genomes[active_tab]
+            selected_chromosomes = selected_chromosomes[active_tab]
+            tab_data = graph_data[active_tab]
+        except:
             raise PreventUpdate
 
-#        tnv = get_triggered_info(ctx)  # [type, name, value]
-#        print('    triggered: ', tnv[1])                                                                          #############  DEBUG
+        if not gtd or not selected_genomes or not graph_data or active_tab not in graph_data:
+            raise PreventUpdate
 
-        selected_chromosomes = selected_chromosomes[active_tab]
+        print('    selected genomes: ', selected_genomes)                                                     #############  DEBUG
 
-        tab_data = graph_data[active_tab]
-        
         fig = go.Figure()
         # Add a dummy trace to force the use of y2 (displays total genome length)
         fig.add_trace(go.Scatter(x=[None], y=[None], showlegend=False, yaxis="y2"))
@@ -393,9 +430,18 @@ def register_left_panel_callbacks(app):
     # Callback to update the graph layout using Patch
     @app.callback(Output({'id':"graph", 'tab':MATCH}, "figure", allow_duplicate=True),
                  [Input({'id':'graph-title', 'tab':MATCH}, 'value'), Input({'id':'X-title', 'tab':MATCH}, 'value'), Input({'id':'Y-title', 'tab':MATCH}, 'value')],
-                 prevent_initial_call = True
+                 [State({'id':"graph", 'tab':MATCH}, "figure"), State('tabs', 'active_tab')],
+                  prevent_initial_call = True
     )
-    def update_graph_layout(title, xaxis_label, yaxis_label):
+    def update_graph_layout(title, xaxis_label, yaxis_label, figure, active_tab):
+        print("\ncallback 7: update_graph_layout()")                                                           ########## DEBUG
+        if not figure:
+            raise PreventUpdate
+        active_tab = active_tab.split('-')[-1]
+        gtd = get_triggered_dict(callback_context.triggered)
+        if gtd.get('tab') != active_tab:
+            raise PreventUpdate
+
         patch = Patch()
         if title:
             patch['layout']['title'] = title
@@ -403,8 +449,5 @@ def register_left_panel_callbacks(app):
             patch['layout']['xaxis']['title'] = xaxis_label
         if yaxis_label:
             patch['layout']['yaxis']['title'] = yaxis_label
-        
-        if patch:
-            return patch
-        else:
-            raise PreventUpdate
+
+        return patch
