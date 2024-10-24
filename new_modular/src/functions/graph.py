@@ -275,8 +275,8 @@ def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromo
                 # Calculate start positions based on the position_mode
                 if position_mode == "exact":
                     # Use exact start positions from the data
-                    start_1_position = chr_1_start_position + line["start_1"]
-                    start_2_position = chr_2_start_position + line["start_2"]
+                    start_1_position = int(chr_1_start_position) + int(line["start_1"])
+                    start_2_position = int(chr_2_start_position) + int(line["start_2"])
                 elif position_mode == "middle":
                     # Use the middle position of the chromosome segment
                     start_1_position = chr_1_start_position + (line["chr_1_length"] / 2)
