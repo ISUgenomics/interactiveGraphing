@@ -32,7 +32,7 @@ def create_synteny_selection(tab_name):
 
             html.Label('select and sort chromosomes: ', className='mb-1 label-s'),
             dcc.RadioItems(['original', 'length', 'connections'], value='original', id={'id':'chr-sort', 'tab': tab_name}, inline=True, labelClassName="ms-0 me-4"),
-            html.Div(id="synteny-chromosome-selection"),
+            html.Div(id={'id':"synteny-chromosome-selection", "tab":tab_name}),
         ])
     ]
 
