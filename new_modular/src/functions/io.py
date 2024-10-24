@@ -43,7 +43,7 @@ def decode_base64(filename, string):
                     header = header + extra_headers
             df.columns = header
         
-        df = df.apply(pd.to_numeric, errors='ignore')
+        df[df.select_dtypes(include=['number']).columns] = df.select_dtypes(include=['number']).apply(pd.to_numeric)
 
         return df
     except Exception as e:
