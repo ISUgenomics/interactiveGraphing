@@ -5,6 +5,13 @@ import plotly.express as px
 import plotly.graph_objs as go
 from src.functions.io import decode_base64, format_length
 
+
+
+
+###------ GENERAL ------###
+
+
+
 ###------ SYNTENY PLOT ------###
 
 
@@ -76,7 +83,7 @@ def process_chromosomes(df, genome):
     # Populate genome data with chromosome information (length, color, name)
     for i, (_, row) in enumerate(chromosomes.iterrows()):
         chr_name = row[genome]
-        chr_length = row[len_col]
+        chr_length = pd.to_numeric(row[len_col], errors='coerce')
         chr_color = colors[i % len(colors)]
 
         genome_data["chromosomes"][chr_name] = {
