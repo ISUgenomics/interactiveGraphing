@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
 from src.params.styles import *
@@ -138,6 +139,35 @@ def get_triggered_info(ctx):
         else:
             info[1] = tmp.split('.')[0]
     return info
+
+
+def get_triggered_dict(ctx):
+    info = {}
+    try:
+        item = ctx[0]
+        json_part, property = item['prop_id'].split('.')
+        try:
+            json_data = json.loads(json_part)
+            info.update(json_data)
+        except:
+            info['id'] = json_part
+        info['property'] = property
+        info['value'] = item.get('value')
+    finally:
+        return info
+
+
+def get_triggered_index(items, key='tab', value=None):
+    """
+    Returns the index of the dictionary in the list where `key` matches the `value`.
+    If no match is found, returns None.
+    
+    :param items: List of dictionaries to search
+    :param key: The dictionary key to match (default is 'tab')
+    :param value: The value to match for the specified key
+    :return: Index of the matching dictionary or None if not found
+    """
+    return next((i for i, item in enumerate(items) if item.get(key) == value), None)
 
 
 def find_component_ids(component):
