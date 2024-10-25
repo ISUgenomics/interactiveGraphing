@@ -1,8 +1,11 @@
+import json
 import dash_bootstrap_components as dbc
 from dash import dcc, html, no_update, callback_context
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State, ALL
 from src.layout.options import create_left_panel
+from src.layout.database import insert_tab, parse_and_insert_content
+
 
 
 def register_basic_callbacks(app):
@@ -13,12 +16,13 @@ def register_basic_callbacks(app):
                    Output('graph-panelDiv', 'children'), Output('graph-panel-children', 'data'),        # graphs & storage
                    Output('lower-panelDiv', 'children'), Output('output-panel-children', 'data')],      # outputs & storage
                    Input('add-app-tab', 'n_clicks'),
-                  [State('tabs', 'children'), State('visualizations', 'value'), State('add-app-tab-num', 'data'), 
-                   State('left-panel-children', 'data'), State('graph-panel-children', 'data'), State('output-panel-children', 'data')],
+                  [State('visualizations', 'value'), State('tabs', 'children'), State('add-app-tab-num', 'data'), 
+                   State('optionsDiv', 'children'), State('left-panel-children', 'data'), 
+                   State('graph-panel-children', 'data'), State('output-panel-children', 'data')],
                    prevent_initial_call = True
     )
-    def manage_app_tabs(n_clicks, existing_tabs, selected_app, app_tabs, left_content, graph_content, output_content):
-#        print(n_clicks, len(existing_tabs), len(app_tabs), existing_tabs[0])                                                          ######### DEBUG
+    def manage_app_tabs(n_clicks, selected_app, existing_tabs, app_tabs, left_options, left_content, graph_content, output_content):
+        print('\ncallback: manage_app_tabs()')                                                                                      ######### DEBUG
         if n_clicks == 0:
             if not len(app_tabs):                           # if tabs register empty, create it based on existing tabs
                 return [no_update, existing_tabs, no_update, no_update, no_update, no_update, no_update, no_update]
@@ -42,10 +46,16 @@ def register_basic_callbacks(app):
         num = found_value + 1 if found_value else 1
 
         tab_name = f"{selected_app}_{num}"
+        print(f'add new tab: {tab_name}')                                                                                           ########## DEBUG
         new_tab = dbc.Tab(label=tab_name, id={'id':"app-tab-",'tab': tab_name}, tab_id=f"tab-{tab_name}", class_name='index-tab')
         existing_tabs.append(new_tab)
+ 
+        opts = html.Div(children=create_left_panel(tab_name), id={'id':"lopts-",'tab': tab_name}, className='d-none')
+        # Insert the tab and the components into the database
+        insert_tab(tab_name, tab_name.capitalize().replace('_', ' Tab '), selected_app)
+        parse_and_insert_content(tab_name, opts.to_plotly_json())                                                                   ########## UPGRADE: improve to make sure the nested structure is complete (same as passed via dcc.Store)
 
-        left_content.append(html.Div(children=create_left_panel(tab_name), id={'id':"lopts-",'tab': tab_name}, className='d-none'))
+        left_content.append(opts)
         graph_content.append(html.Div(children=[dcc.Graph(id={'id': "graph", 'tab': tab_name})], id={'id':"graphing-",'tab': tab_name}, className='d-none'))
         output_content.append(html.Div(id={'id': "outputs-", 'tab': tab_name}, className='d-none'))
 
