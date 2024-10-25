@@ -2,11 +2,13 @@ from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from src.pages import index, about
 from src.callbacks import register_callbacks
+from src.apps import register_app_callbacks
 from src.params.generic import PARAMS                                          # DEBUG ############
 from src.params.styles import *
 from src.layout.storage import storage, void, identifiers
 from src.pages import index, about
 from src.layout.graphing import right_panel
+from src.layout.database import init_db
 from src.functions.widgets import find_component_ids                           # DEBUG ############
 
 external_stylesheets = [
@@ -45,9 +47,13 @@ app.index_string = '''
             {%scripts%}
             {%renderer%}
             <div class="footer row m-0">
-                <div class="d-inline w-25">Copyright 2024 GIF@ISU</div>
+                <div class="d-inline w-25">Copyright 2024 Iowa State University</div>
                 <div class="d-inline w-50">© <b>Interactive Graphing</b></div>
-                <div class="d-inline w-25">Development: <a style="text-decoration: none;" href="https://github.com/aedawid" target="_blank">abadacz</a></div></div>
+                <div class="d-inline w-25">Development: 
+                    <a style="text-decoration: none;" href="https://github.com/aedawid" target="_blank">abadacz</a>
+                    @<a style="text-decoration: none;" href="https://www.biotech.iastate.edu/gif/" target="_blank">GIF.iastate</a>
+                </div>
+            </div>
         </footer>
     </body>
 </html>
@@ -94,9 +100,15 @@ print("The following keys from PARAMS are missing in the all_ids list:", missing
 
 
 
-# Import all callbacks
-register_callbacks(app)
-
 
 if __name__ == "__main__":
+
+    # Initialize database for dynamic options management
+    init_db()
+
+    # Import all callbacks
+    register_callbacks(app)
+    register_app_callbacks(app)
+
+    # Launch the app GUI on a local server
     app.run(debug=True, port=8085, use_reloader=False)
