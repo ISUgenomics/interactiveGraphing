@@ -75,7 +75,7 @@ def create_opts_analysis_synteny(tab_name):
             dbc.Accordion([
                 dbc.AccordionItem(create_synteny_merge_data(tab_name), title="MERGE DATA (optional)", item_id="graph-synteny-1"),
                 dbc.AccordionItem(create_synteny_graph_inputs(tab_name), title="SELECT GRAPH INPUTS", item_id="graph-synteny-2"),
-                dbc.AccordionItem(create_synteny_selection(tab_name), title="SELECT SPECIES / CHROMOSOMES", item_id="graph-3"),
+                dbc.AccordionItem(create_synteny_selection(tab_name), title="SELECT SPECIES / CHROMOSOMES", item_id="graph-synteny-3"),
             ], id={'id':"opts-analysis-synteny", 'tab': tab_name}, class_name='accordion2 p-0', start_collapsed=True, always_open=True, flush=False, className='w-100 p-0'),
         ])
     ]
@@ -88,7 +88,7 @@ def create_opts_graph_synteny(tab_name):
         dbc.Accordion([
           dbc.AccordionItem(create_synteny_chromosome(tab_name), title="CHROMOSOMES", item_id="graph-synteny-1"),
           dbc.AccordionItem(create_synteny_line(tab_name), title="SYNTENY LINES", item_id="graph-synteny-2"),
-          dbc.AccordionItem(create_synteny_ribbon(tab_name), title="SYNTENY RIBBON", item_id="graph-3"),
+          dbc.AccordionItem(create_synteny_ribbon(tab_name), title="SYNTENY RIBBON", item_id="graph-synteny-3"),
         ], id={'id':"graph-custom-synteny", 'tab': tab_name}, class_name='accordion2 p-0', start_collapsed=True, always_open=True, flush=False, className='w-100 p-0'),
       ], className="row align-items-center mt-1"),
     ]
