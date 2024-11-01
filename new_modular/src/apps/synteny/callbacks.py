@@ -443,6 +443,7 @@ def register_synteny_callbacks(app):
     def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data, graph_id):
         print("\ncallback 6: generate_synteny_graph()")                                                      ########## DEBUG
         active_tab = active_tab.split('-')[-1]
+#        position_mode = 'ribbon'
         if active_tab in ['home', 'tab']:
             raise PreventUpdate
         if active_tab != graph_id.get('tab'):
@@ -480,7 +481,7 @@ def register_synteny_callbacks(app):
         fig.update_xaxes(range=x_range)
 
         # Plot synteny lines only for neighboring selected genomes
-        line_traces = create_bezier_synteny_lines(
+        line_traces, shape_traces = create_bezier_synteny_lines(
             tab_data,
             selected_genomes,
             selected_chromosomes,
@@ -489,8 +490,10 @@ def register_synteny_callbacks(app):
             position_mode=position_mode,
             height=bar_height
         )
-        for trace in line_traces:
-            fig.add_trace(trace)
+        fig.update_layout(shapes=shape_traces)
+        fig.add_traces(line_traces)
+    #    for trace in line_traces:
+    #        fig.add_trace(trace)
 
         # Plot chromosomes for each selected genome with proper colors
         for genome in selected_genomes:
