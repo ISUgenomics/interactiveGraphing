@@ -72,11 +72,7 @@ def process_chromosomes(df, genome):
 
     # Group by chromosome and get the first length value for each
     chromosomes = df.groupby(genome).agg({len_col: 'first'}).reset_index()
-
-    # Create genome data structure without assigning positions initially
     genome_data = {"chromosomes": {}, "total_length": 0}
-
-    # Assign a color palette for the chromosomes
     num_chr = len(chromosomes)
     colors = get_discrete_colors_from_scale("viridis", num_chr)
 
@@ -89,7 +85,7 @@ def process_chromosomes(df, genome):
         genome_data["chromosomes"][chr_name] = {
             "name": chr_name,
             "length": chr_length,
-            "color": chr_color,  # Ensure each chromosome gets a color
+            "color": chr_color,
             "position": None  # Position will be calculated later dynamically
         }
 
@@ -111,31 +107,25 @@ def generate_synteny_lines(df, genome_names, graph_data):
                 chr_1 = row[genome_1]
                 chr_2 = row[genome_2]
 
-                if chr_1 not in graph_data["genomes"][genome_1]["chromosomes"] or \
-                   chr_2 not in graph_data["genomes"][genome_2]["chromosomes"]:
+                if not chr_1 or not chr_2:
                     continue
 
                 # Retrieve chromosome data for both genomes
-                chr_1_data = graph_data["genomes"][genome_1]["chromosomes"][chr_1]
-                chr_2_data = graph_data["genomes"][genome_2]["chromosomes"][chr_2]
-
                 start_1 = row[f"{genome_1}_start"]
+                end_1 = row[f"{genome_1}_end"]
                 start_2 = row[f"{genome_2}_start"]
+                end_2 = row[f"{genome_2}_end"]
 
                 # Store synteny line data without absolute positions
                 synteny_lines.append({
                     "genome_1": genome_1,
                     "chr_1": chr_1,
                     "start_1": start_1,
-                    "end_1": row[f"{genome_1}_end"],
-                    "chr_1_length": chr_1_data["length"],
+                    "end_1": end_1,
                     "genome_2": genome_2,
                     "chr_2": chr_2,
                     "start_2": start_2,
-                    "end_2": row[f"{genome_2}_end"],
-                    "chr_2_length": chr_2_data["length"],
-                    "color_1": chr_1_data["color"],
-                    "color_2": chr_2_data["color"]
+                    "end_2": end_2
                 })
 
     return synteny_lines
@@ -216,10 +206,11 @@ def create_chromosome_traces(genome_name, genome_data, chromosomes_to_plot, chro
         connections = chr_connections.get(chr_key, {})
         connection_info = []
         for connected_genome, details in connections.items():
-            if isinstance(details, dict) and "count" in details and "chromosomes" in details:
+            if "count" in details and "chromosomes" in details:
                 count = details["count"]
                 connected_chromosomes = details["chromosomes"]
-                text_chunks = split_text_by_length(", ".join(connected_chromosomes), max_length=50)
+                formatted_connections = [f"{chr_name}: {count}" for chr_name, count in connected_chromosomes.items()]
+                text_chunks = split_text_by_length(", ".join(formatted_connections), max_length=50)
                 text_formatted = "<br>".join(text_chunks)
                 connection_info.append(f"Synteny to {connected_genome}: {count}<br>{text_formatted}")
         synteny_info = "<br><br>".join(connection_info) if connection_info else "Synteny Connections: 0"
@@ -244,9 +235,10 @@ def create_chromosome_traces(genome_name, genome_data, chromosomes_to_plot, chro
 
 
 
-def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromosomes, chromosome_positions, genome_y_positions, position_mode="exact", height=2):
+def create_bezier_synteny_lines(tab_data, selected_genomes, selected_chromosomes, chromosome_positions, genome_y_positions, position_mode="exact", height=2):
     line_traces = []
     num_segments = 5
+    synteny_lines = tab_data["synteny_lines"]
 
     # Iterate over selected genomes and create synteny lines for neighboring pairs
     for i in range(len(selected_genomes) - 1):
@@ -272,6 +264,10 @@ def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromo
                 if chr_1_start_position is None or chr_2_start_position is None:
                     continue
 
+                # Access chromosome lengths from genomes
+                chr_1_length = tab_data["genomes"][line["genome_1"]]["chromosomes"][line["chr_1"]]["length"]
+                chr_2_length = tab_data["genomes"][line["genome_2"]]["chromosomes"][line["chr_2"]]["length"]
+
                 # Calculate start positions based on the position_mode
                 if position_mode == "exact":
                     # Use exact start positions from the data
@@ -279,14 +275,13 @@ def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromo
                     start_2_position = int(chr_2_start_position) + int(line["start_2"])
                 elif position_mode == "middle":
                     # Use the middle position of the chromosome segment
-                    start_1_position = chr_1_start_position + (line["chr_1_length"] / 2)
-                    start_2_position = chr_2_start_position + (line["chr_2_length"] / 2)
+                    start_1_position = chr_1_start_position + (chr_1_length / 2)
+                    start_2_position = chr_2_start_position + (chr_2_length / 2)
                 else:
                     raise ValueError("Invalid position_mode. Must be 'exact' or 'middle'.")
 
                 # Extract y-offsets based on the current genome positions
-                y1 = genome_y_positions[line["genome_1"]]
-                y2 = genome_y_positions[line["genome_2"]]
+                y1, y2 = genome_y_positions[line["genome_1"]], genome_y_positions[line["genome_2"]]
 
                 # Adjust y positions to avoid overlap; height is added to ensure the curve reaches the right height
                 y1, y2 = (y1 + height, y2) if y1 < y2 else (y1, y2 + height)
@@ -295,7 +290,9 @@ def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromo
                 bezier_x, bezier_y = bezier_curve(start_1_position, y1, start_1_position, (y1 + y2) / 2, start_2_position, (y1 + y2) / 2, start_2_position, y2)
 
                 # Create gradient colors between start and end
-                colors = get_gradient_colors(line["color_1"], line["color_2"], num_segments)
+                color_1 = tab_data["genomes"][line["genome_1"]]["chromosomes"][line["chr_1"]]["color"]
+                color_2 = tab_data["genomes"][line["genome_2"]]["chromosomes"][line["chr_2"]]["color"]
+                colors = get_gradient_colors(color_1, color_2, num_segments)
 
                 # Split the Bezier curve into segments for gradient coloring
                 segment_length = len(bezier_x) // num_segments
