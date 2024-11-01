@@ -234,9 +234,26 @@ def create_chromosome_traces(genome_name, genome_data, chromosomes_to_plot, chro
     return traces
 
 
+# Function to create Bezier control points
+def create_curve_points(x0, y0, x1, y1, control_offset=0.2):
+    # Create control points for the left edge
+    control_x1_left = x0 + control_offset * (x1 - x0)
+    control_y1_left = y0 + control_offset * (y1 - y0)
+    
+    # Create control points for the right edge
+    control_x1_right = x1 - control_offset * (x1 - x0) * 3
+    control_y1_right = y1 - control_offset * (y1 - y0) * 3
+    
+    if control_x1_left > control_x1_right:
+        tmp = control_x1_left - control_x1_right
+        control_x1_left -= tmp
+
+    return control_x1_left, control_y1_left, control_x1_right, control_y1_right
+
 
 def create_bezier_synteny_lines(tab_data, selected_genomes, selected_chromosomes, chromosome_positions, genome_y_positions, position_mode="exact", height=2):
     line_traces = []
+    shape_traces = []
     num_segments = 5
     synteny_lines = tab_data["synteny_lines"]
 
@@ -275,8 +292,66 @@ def create_bezier_synteny_lines(tab_data, selected_genomes, selected_chromosomes
                     start_2_position = int(chr_2_start_position) + int(line["start_2"])
                 elif position_mode == "middle":
                     # Use the middle position of the chromosome segment
-                    start_1_position = chr_1_start_position + (chr_1_length / 2)
-                    start_2_position = chr_2_start_position + (chr_2_length / 2)
+                    start_1_position = int(chr_1_start_position) + (chr_1_length / 2)
+                    start_2_position = int(chr_2_start_position) + (chr_2_length / 2)
+                elif position_mode == "ribbon":
+                    # Calculate exact start and end positions for both chromosomes
+                    start_1_position = int(chr_1_start_position) + int(line["start_1"])
+                    end_1_position = int(chr_1_start_position) + int(line["end_1"])
+                    start_2_position = int(chr_2_start_position) + int(line["start_2"])
+                    end_2_position = int(chr_2_start_position) + int(line["end_2"])
+
+                    y1_bottom = genome_y_positions[genome_1]            # bottom edge of upper chromosome
+                    y2_top = genome_y_positions[genome_2] + height      # top edge of lower chromosome
+
+                    # Define control points using create_curve_points() to smooth the curve horizontally
+#                    control_x1_left, control_y1_left, control_x1_right, control_y1_right = create_curve_points(start_1_position, y1_bottom, start_2_position, y2_top, control_offset=0.3)
+#                    control_x2_left, control_y2_left, control_x2_right, control_y2_right = create_curve_points(end_1_position, y1_bottom, end_2_position, y2_top, control_offset=0.2)
+
+                    # Define the ribbon path with smooth curves and flat edges at y1_bottom and y2_top
+#                    path = f'M {start_1_position},{y1_bottom} ' \
+#                           f'C {control_x1_left},{control_y1_left} {control_x2_left},{control_y2_left} {start_2_position},{y2_top} ' \
+#                           f'L {end_2_position},{y2_top} ' \
+#                           f'C {control_x2_right},{control_y2_right} {control_x1_right},{control_y1_right} {end_1_position},{y1_bottom} Z'
+
+
+                    # Define intermediate points at one-third and two-thirds along the path
+                    x1_third = start_1_position + (start_2_position - start_1_position) / 3
+                    x2_third = start_1_position + 2 * (start_2_position - start_1_position) / 3
+                    x3_third = end_1_position + (end_2_position - end_1_position) / 3
+                    x4_third = end_1_position + 2 * (end_2_position - end_1_position) / 3
+
+                    # Define control points for smoother curves at the top edge and flat at the bottom edge
+                    control_x1_left, control_y1_left, control_x1_right, control_y1_right = create_curve_points(
+                        start_1_position, y1_bottom, start_2_position, y2_top, control_offset=0.3
+                    )
+                    control_x2_left, control_y2_left, control_x2_right, control_y2_right = create_curve_points(
+                        end_1_position, y1_bottom, end_2_position, y2_top, control_offset=0.2
+                    )
+
+                    # Construct the path with four intermediate points (two on each edge) for smoother S-shape
+                    path = f'M {start_1_position},{y1_bottom} ' \
+                           f'C {control_x1_left},{control_y1_left} {x1_third},{y2_top} {start_2_position},{y2_top} ' \
+                           f'L {end_2_position},{y2_top} ' \
+                           f'C {x4_third},{y2_top} {control_x2_right},{control_y2_right} {end_1_position},{y1_bottom} Z'
+
+
+                    # Retrieve colors
+                    color_1 = tab_data["genomes"][line["genome_1"]]["chromosomes"][line["chr_1"]]["color"]
+                    color_2 = tab_data["genomes"][line["genome_2"]]["chromosomes"][line["chr_2"]]["color"]
+                    
+                    # Add ribbon shape
+                    shape_traces.append({
+                        'type': 'path',
+                        'path': path,
+                        'fillcolor': color_1,
+                        'opacity': 0.2,
+                        'line': {
+                            'width': 2,
+                            'color': color_1,
+                        }
+                    })
+                    continue
                 else:
                     raise ValueError("Invalid position_mode. Must be 'exact' or 'middle'.")
 
@@ -317,7 +392,7 @@ def create_bezier_synteny_lines(tab_data, selected_genomes, selected_chromosomes
                     )
                     line_traces.append(trace)
 
-    return line_traces
+    return line_traces, shape_traces
 
 
 
