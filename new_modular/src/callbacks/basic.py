@@ -5,7 +5,7 @@ from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State, ALL
 from plotly.utils import PlotlyJSONEncoder
 from src.layout.options import create_left_panel
-from src.layout.database import insert_tab, parse_and_insert_content
+#from src.layout.database import insert_tab, parse_and_insert_content
 
 
 
@@ -53,14 +53,14 @@ def register_basic_callbacks(app):
  
         opts = html.Div(children=create_left_panel(tab_name), id={'id':"lopts-",'tab': tab_name}, className='d-none')
         # Insert the tab and the components into the database
-        insert_tab(tab_name, tab_name.capitalize().replace('_', ' Tab '), selected_app)
-        parse_and_insert_content(tab_name, json.dumps(opts.to_plotly_json(), cls=PlotlyJSONEncoder))                                                                   ########## UPGRADE: improve to make sure the nested structure is complete (same as passed via dcc.Store)
+#        insert_tab(tab_name, tab_name.capitalize().replace('_', ' Tab '), selected_app)
+#        parse_and_insert_content(tab_name, json.dumps(opts.to_plotly_json(), cls=PlotlyJSONEncoder))                                                                   ########## UPGRADE: improve to make sure the nested structure is complete (same as passed via dcc.Store)
 #        print(opts, "\n\n")
 #        print(opts.to_dict())
 #        print(opts.to_plotly_json())
 
-        if left_content:
-            print(len(left_content), '\n\n', left_content)
+#        if left_content:
+#            print(len(left_content), '\n\n', left_content)
 
         left_content.append(opts)
         graph_content.append(html.Div(children=[dcc.Graph(id={'id': "graph", 'tab': tab_name})], id={'id':"graphing-",'tab': tab_name}, className='d-none'))
