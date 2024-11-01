@@ -8,7 +8,7 @@ from src.params.styles import *
 from src.layout.storage import storage, void, identifiers
 from src.pages import index, about
 from src.layout.graphing import right_panel
-from src.layout.database import init_db
+#from src.layout.database import init_db
 from src.functions.widgets import find_component_ids                           # DEBUG ############
 
 external_stylesheets = [
@@ -104,7 +104,7 @@ print("The following keys from PARAMS are missing in the all_ids list:", missing
 if __name__ == "__main__":
 
     # Initialize database for dynamic options management
-    init_db()
+#    init_db()
 
     # Import all callbacks
     register_callbacks(app)
