@@ -437,13 +437,13 @@ def register_synteny_callbacks(app):
                  [Input("synteny-genomes-selected", "data"), Input('synteny-chr-selected', 'data'),
                   Input({'id':"synteny-chr-spacing", 'tab':MATCH}, "value"), Input({'id':"synteny-chr-height", 'tab':MATCH}, "value"), 
                   Input({'id':"synteny-chr-alignment", 'tab':MATCH}, "value"), Input({'id':"synteny-line-position", 'tab':MATCH}, "value")],
-                 [State('tabs', 'active_tab'), State("graph-data", "data"), State({'id':"graph", 'tab':MATCH}, "id")],
+                 [State('tabs', 'active_tab'), State("graph-data", "data"), State({'id':"graph", 'tab':MATCH}, "id"),
+                  State({'id':"synteny-line-width", 'tab': MATCH}, 'value'), State({'id':"synteny-line-opacity", 'tab': MATCH}, 'value')],
                  prevent_initial_call = True
     )
-    def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data, graph_id):
+    def generate_synteny_graph(selected_genomes, selected_chromosomes, spacing, bar_height, alignment, position_mode, active_tab, graph_data, graph_id, line_width, line_opacity):
         print("\ncallback 6: generate_synteny_graph()")                                                      ########## DEBUG
         active_tab = active_tab.split('-')[-1]
-#        position_mode = 'ribbon'
         if active_tab in ['home', 'tab']:
             raise PreventUpdate
         if active_tab != graph_id.get('tab'):
@@ -481,17 +481,17 @@ def register_synteny_callbacks(app):
         fig.update_xaxes(range=x_range)
 
         # Plot synteny lines only for neighboring selected genomes
-        line_traces, shape_traces = create_bezier_synteny_lines(
-            tab_data,
-            selected_genomes,
-            selected_chromosomes,
-            chromosome_positions,
-            genome_y_positions,
-            position_mode=position_mode,
-            height=bar_height
+        line_traces, shape_traces, scatter_trace = create_bezier_synteny_lines(
+            tab_data, selected_genomes, selected_chromosomes,
+            chromosome_positions, genome_y_positions, position_mode=position_mode,
+            height=bar_height,
+            width=line_width, opacity=line_opacity
         )
+        print(len(scatter_trace))
         fig.update_layout(shapes=shape_traces)
         fig.add_traces(line_traces)
+        for trace in scatter_trace:
+            fig.add_trace(trace)
     #    for trace in line_traces:
     #        fig.add_trace(trace)
 
@@ -507,3 +507,48 @@ def register_synteny_callbacks(app):
                     fig.add_trace(trace)
 
         return fig
+    
+
+
+    # Callback to update the graph layout using Patch
+    @app.callback(Output({'id':"graph", 'tab':MATCH}, "figure", allow_duplicate=True),
+                 [Input({'id':"synteny-line-width", 'tab': MATCH}, 'value'), Input({'id':"synteny-line-opacity", 'tab': MATCH}, 'value')],
+                 [State({'id':"synteny-line-position", 'tab':MATCH}, "value"), State({'id':"graph", 'tab':MATCH}, "figure"), State('tabs', 'active_tab')],
+                  prevent_initial_call = True
+    )
+    def update_synteny_graph_layout(line_width, line_opacity, position_mode, figure, active_tab):
+        print("\ncallback 7: update_graph_layout()")                                                           ########## DEBUG
+        if not figure:
+            raise PreventUpdate
+        active_tab = active_tab.split('-')[-1]
+        gtd = get_triggered_dict(callback_context.triggered)
+        if gtd.get('tab') != active_tab:
+            raise PreventUpdate
+        
+        line_params = ['width', 'color']
+        param = gtd.get('id').split('-')[-1]
+        param_value = locals().get(f"line_{param}", None)
+
+        print(position_mode, param, param_value)
+
+        # Update `shapes` in `layout` for synteny in ribbon mode 
+        if position_mode == 'ribbon':
+            for shape in figure['layout']['shapes']:
+                if param in line_params:
+                    if 'line' not in shape:
+                        shape['line'] = {}
+                    shape['line'][param] = param_value
+                else:
+                    shape[param] = param_value
+        # Update `data` for synteny in line mode
+        else:
+            for trace in figure['data']:
+                if trace.get('meta') == 'synteny_lines' and trace['type'] == 'scatter':
+                    if param in line_params:
+                        if 'line' not in trace:
+                            trace['line'] = {}
+                        trace['line'][param] = param_value
+                    else:
+                        trace[param] = param_value
+
+        return figure
