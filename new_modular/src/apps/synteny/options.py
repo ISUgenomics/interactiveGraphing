@@ -56,9 +56,15 @@ def create_synteny_chromosome(tab_name):
 def create_synteny_line(tab_name):
     return [
         html.Div([
-            html.Label('position:', className='col-4 d-inline label-s', title="Choose position mode for chromosomes"),
-            dcc.RadioItems(['exact', 'middle'], value='exact', id={'id':"synteny-line-position", 'tab': tab_name}, inline=True, className="col-8 p-0", labelClassName="ms-0 me-3"),
-        ], className="row align-items-center mt-2 pe-2 h34 w-100"),
+            html.Label('line at chr position or synteny range:', className='col-12 label-s', title="Choose synteny mode to get positioning on a chromosome: \n - 'exact' - lines from synteny start region \n - 'middle' - lines from the middle of chromosome \n - 'ribbon' - 2D shapes extending over the synteny region"),
+            dcc.RadioItems(['exact', 'middle', 'ribbon'], value='ribbon', id={'id':"synteny-line-position", 'tab': tab_name}, inline=True, className="col-12", labelClassName="ms-0 me-3"),
+        ], className="row mt-2 mb-2 h34 me-0 px-0"),
+        html.Div([
+            html.Label('width:', className='col-2 me-3 label-s', title="Choose line/ribbon width"),
+            dcc.Input(id={'id':"synteny-line-width", 'tab': tab_name}, type="number", min=0.1, max=5, step=0.1, placeholder="1", value=1, debounce=True, className='col-3 me-2 mt-1'),
+            html.Label('opacity:', className='col-2 me-3 label-s', title="Choose line/ribbon opacity"),
+            dcc.Input(id={'id':"synteny-line-opacity", 'tab': tab_name}, type="number", min=0.0, max=1.0, step=0.01, placeholder="0.5", value=0.5, debounce=True, className='col-3 mt-1'), 
+        ], className="row align-items-center mt-3"),
     ]
 
 # Synteny ribbon setup:
@@ -87,8 +93,8 @@ def create_opts_graph_synteny(tab_name):
       html.Div([
         dbc.Accordion([
           dbc.AccordionItem(create_synteny_chromosome(tab_name), title="CHROMOSOMES", item_id="graph-synteny-1"),
-          dbc.AccordionItem(create_synteny_line(tab_name), title="SYNTENY LINES", item_id="graph-synteny-2"),
-          dbc.AccordionItem(create_synteny_ribbon(tab_name), title="SYNTENY RIBBON", item_id="graph-synteny-3"),
+          dbc.AccordionItem(create_synteny_line(tab_name), title="SYNTENY LINES / RIBBONS", item_id="graph-synteny-2"),
+#          dbc.AccordionItem(create_synteny_ribbon(tab_name), title="SYNTENY RIBBON", item_id="graph-synteny-3"),
         ], id={'id':"graph-custom-synteny", 'tab': tab_name}, class_name='accordion2 p-0', start_collapsed=True, always_open=True, flush=False, className='w-100 p-0'),
       ], className="row align-items-center mt-1"),
     ]
