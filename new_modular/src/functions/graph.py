@@ -5,14 +5,23 @@ import plotly.express as px
 import plotly.graph_objs as go
 from src.functions.io import decode_base64, format_length
 
+
+
+
+###------ GENERAL ------###
+
+
+
 ###------ SYNTENY PLOT ------###
 
 
 def load_dataframe(df_id, files, edits):
-    if '#' in df_id:
-        return pd.DataFrame.from_dict(edits[df_id['data']])
-    else:
+    if '#' in df_id and df_id in edits:
+        return pd.DataFrame.from_dict(edits[df_id].get('data', {}))
+    elif df_id in files:
         return decode_base64(df_id, files[df_id])
+    else:
+        raise KeyError(f"Key '{df_id}' not found.")
 
 
 def split_text_by_length(text, max_length=200, delimiter=", "):
@@ -63,24 +72,20 @@ def process_chromosomes(df, genome):
 
     # Group by chromosome and get the first length value for each
     chromosomes = df.groupby(genome).agg({len_col: 'first'}).reset_index()
-
-    # Create genome data structure without assigning positions initially
     genome_data = {"chromosomes": {}, "total_length": 0}
-
-    # Assign a color palette for the chromosomes
     num_chr = len(chromosomes)
     colors = get_discrete_colors_from_scale("viridis", num_chr)
 
     # Populate genome data with chromosome information (length, color, name)
     for i, (_, row) in enumerate(chromosomes.iterrows()):
         chr_name = row[genome]
-        chr_length = row[len_col]
+        chr_length = pd.to_numeric(row[len_col], errors='coerce')
         chr_color = colors[i % len(colors)]
 
         genome_data["chromosomes"][chr_name] = {
             "name": chr_name,
             "length": chr_length,
-            "color": chr_color,  # Ensure each chromosome gets a color
+            "color": chr_color,
             "position": None  # Position will be calculated later dynamically
         }
 
@@ -102,31 +107,25 @@ def generate_synteny_lines(df, genome_names, graph_data):
                 chr_1 = row[genome_1]
                 chr_2 = row[genome_2]
 
-                if chr_1 not in graph_data["genomes"][genome_1]["chromosomes"] or \
-                   chr_2 not in graph_data["genomes"][genome_2]["chromosomes"]:
+                if not chr_1 or not chr_2:
                     continue
 
                 # Retrieve chromosome data for both genomes
-                chr_1_data = graph_data["genomes"][genome_1]["chromosomes"][chr_1]
-                chr_2_data = graph_data["genomes"][genome_2]["chromosomes"][chr_2]
-
                 start_1 = row[f"{genome_1}_start"]
+                end_1 = row[f"{genome_1}_end"]
                 start_2 = row[f"{genome_2}_start"]
+                end_2 = row[f"{genome_2}_end"]
 
                 # Store synteny line data without absolute positions
                 synteny_lines.append({
                     "genome_1": genome_1,
                     "chr_1": chr_1,
                     "start_1": start_1,
-                    "end_1": row[f"{genome_1}_end"],
-                    "chr_1_length": chr_1_data["length"],
+                    "end_1": end_1,
                     "genome_2": genome_2,
                     "chr_2": chr_2,
                     "start_2": start_2,
-                    "end_2": row[f"{genome_2}_end"],
-                    "chr_2_length": chr_2_data["length"],
-                    "color_1": chr_1_data["color"],
-                    "color_2": chr_2_data["color"]
+                    "end_2": end_2
                 })
 
     return synteny_lines
@@ -207,10 +206,11 @@ def create_chromosome_traces(genome_name, genome_data, chromosomes_to_plot, chro
         connections = chr_connections.get(chr_key, {})
         connection_info = []
         for connected_genome, details in connections.items():
-            if isinstance(details, dict) and "count" in details and "chromosomes" in details:
+            if "count" in details and "chromosomes" in details:
                 count = details["count"]
                 connected_chromosomes = details["chromosomes"]
-                text_chunks = split_text_by_length(", ".join(connected_chromosomes), max_length=50)
+                formatted_connections = [f"{chr_name}: {count}" for chr_name, count in connected_chromosomes.items()]
+                text_chunks = split_text_by_length(", ".join(formatted_connections), max_length=50)
                 text_formatted = "<br>".join(text_chunks)
                 connection_info.append(f"Synteny to {connected_genome}: {count}<br>{text_formatted}")
         synteny_info = "<br><br>".join(connection_info) if connection_info else "Synteny Connections: 0"
@@ -234,10 +234,29 @@ def create_chromosome_traces(genome_name, genome_data, chromosomes_to_plot, chro
     return traces
 
 
+# Function to create Bezier control points
+def create_curve_points(x0, y0, x1, y1, control_offset=0.2):
+    # Create control points for the left edge
+    control_x1_left = x0 + control_offset * (x1 - x0)
+    control_y1_left = y0 + control_offset * (y1 - y0)
+    
+    # Create control points for the right edge
+    control_x1_right = x1 - control_offset * (x1 - x0) * 3
+    control_y1_right = y1 - control_offset * (y1 - y0) * 3
+    
+    if control_x1_left > control_x1_right:
+        tmp = control_x1_left - control_x1_right
+        control_x1_left -= tmp
 
-def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromosomes, chromosome_positions, genome_y_positions, position_mode="exact", height=2):
+    return control_x1_left, control_y1_left, control_x1_right, control_y1_right
+
+
+def create_bezier_synteny_lines(tab_data, selected_genomes, selected_chromosomes, chromosome_positions, genome_y_positions, position_mode="exact", height=2, width=1, opacity=0.5):
     line_traces = []
+    shape_traces = []
+    shape_hover_traces = []
     num_segments = 5
+    synteny_lines = tab_data["synteny_lines"]
 
     # Iterate over selected genomes and create synteny lines for neighboring pairs
     for i in range(len(selected_genomes) - 1):
@@ -263,21 +282,114 @@ def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromo
                 if chr_1_start_position is None or chr_2_start_position is None:
                     continue
 
+                # Access chromosome lengths from genomes
+                chr_1_length = tab_data["genomes"][line["genome_1"]]["chromosomes"][line["chr_1"]]["length"]
+                chr_2_length = tab_data["genomes"][line["genome_2"]]["chromosomes"][line["chr_2"]]["length"]
+
                 # Calculate start positions based on the position_mode
                 if position_mode == "exact":
                     # Use exact start positions from the data
-                    start_1_position = chr_1_start_position + line["start_1"]
-                    start_2_position = chr_2_start_position + line["start_2"]
+                    start_1_position = int(chr_1_start_position) + int(line["start_1"])
+                    start_2_position = int(chr_2_start_position) + int(line["start_2"])
                 elif position_mode == "middle":
                     # Use the middle position of the chromosome segment
-                    start_1_position = chr_1_start_position + (line["chr_1_length"] / 2)
-                    start_2_position = chr_2_start_position + (line["chr_2_length"] / 2)
+                    start_1_position = int(chr_1_start_position) + (chr_1_length / 2)
+                    start_2_position = int(chr_2_start_position) + (chr_2_length / 2)
+                elif position_mode == "ribbon":
+                    # Calculate exact start and end positions for both chromosomes
+                    start_1_position = int(chr_1_start_position) + int(line["start_1"])
+                    end_1_position = int(chr_1_start_position) + int(line["end_1"])
+                    start_2_position = int(chr_2_start_position) + int(line["start_2"])
+                    end_2_position = int(chr_2_start_position) + int(line["end_2"])
+
+                    y1_top = genome_y_positions[genome_1]           # y1_bottom: bottom edge of upper chromosome
+                    y2_bottom = genome_y_positions[genome_2] + height     # y2_top: top edge of lower chromosome
+
+# variant 1
+                    # Define control points using create_curve_points() to smooth the curve horizontally
+##                    control_x1_left, control_y1_left, control_x1_right, control_y1_right = create_curve_points(start_1_position, y1_bottom, start_2_position, y2_top, control_offset=0.3)
+##                    control_x2_left, control_y2_left, control_x2_right, control_y2_right = create_curve_points(end_1_position, y1_bottom, end_2_position, y2_top, control_offset=0.2)
+
+                    # Define the ribbon path with smooth curves and flat edges at y1_bottom and y2_top
+##                    path = f'M {start_1_position},{y1_bottom} ' \
+##                           f'C {control_x1_left},{control_y1_left} {control_x2_left},{control_y2_left} {start_2_position},{y2_top} ' \
+##                           f'L {end_2_position},{y2_top} ' \
+##                           f'C {control_x2_right},{control_y2_right} {control_x1_right},{control_y1_right} {end_1_position},{y1_bottom} Z'
+
+# variant 2
+                    # Define intermediate points at one-third and two-thirds along the path
+#                    x1_third = start_1_position + (start_2_position - start_1_position) / 3
+#                    x2_third = start_1_position + 2 * (start_2_position - start_1_position) / 3
+#                    x3_third = end_1_position + (end_2_position - end_1_position) / 3
+#                    x4_third = end_1_position + 2 * (end_2_position - end_1_position) / 3
+
+                    # Define control points for smoother curves at the top edge and flat at the bottom edge
+#                    control_x1_left, control_y1_left, control_x1_right, control_y1_right = create_curve_points(
+#                        start_1_position, y1_bottom, start_2_position, y2_top, control_offset=0.3
+#                    )
+#                    control_x2_left, control_y2_left, control_x2_right, control_y2_right = create_curve_points(
+#                        end_1_position, y1_bottom, end_2_position, y2_top, control_offset=0.2
+#                    )
+
+                    # Construct the path with four intermediate points (two on each edge) for smoother S-shape
+#                    path = f'M {start_1_position},{y1_bottom} ' \
+#                           f'C {control_x1_left},{control_y1_left} {x1_third},{y2_top} {start_2_position},{y2_top} ' \
+#                           f'L {end_2_position},{y2_top} ' \
+#                           f'C {x4_third},{y2_top} {control_x2_right},{control_y2_right} {end_1_position},{y1_bottom} Z'
+#
+
+# variant 3 - sigmoid shape
+                    # Calculate the top and bottom curves of the ribbon
+                    top_curve, bottom_curve = bezier_ribbon(y1_top, y2_bottom, start_1_position, end_1_position, start_2_position, end_2_position, width)
+
+                    # Construct the path for the ribbon
+                    path = f'M {top_curve[0][0]},{top_curve[1][0]} '
+                    for x, y in zip(top_curve[0][1:], top_curve[1][1:]):
+                        path += f'L {x},{y} '
+
+                    # Connect to the bottom curve path in reverse order to close the ribbon
+                    for x, y in zip(reversed(bottom_curve[0]), reversed(bottom_curve[1])):
+                        path += f'L {x},{y} '
+                    
+                    path += 'Z'  # Close the path to form the ribbon shape
+
+
+                    # Retrieve colors
+                    color_1 = tab_data["genomes"][line["genome_1"]]["chromosomes"][line["chr_1"]]["color"]
+                    color_2 = tab_data["genomes"][line["genome_2"]]["chromosomes"][line["chr_2"]]["color"]
+                    
+                    # Add ribbon shape
+                    shape_traces.append({
+                        'type': 'path',
+                        'path': path,
+                        'fillcolor': color_1,
+                        'opacity': opacity,
+                        'line': {'width': 2, 'color': color_1,},
+                        'showlegend' : False,
+                        'legendgroup' : f"{line['genome_1']}_{line['chr_1']}"
+                    })
+
+                    scatter_x = top_curve[0][::10]
+                    scatter_y = top_curve[1][::10]
+                    hover_trace = {
+                        'type': 'scatter',
+                        'x': scatter_x,
+                        'y': scatter_y,
+                        'mode': 'lines',
+                        'line': {'width': 0.5, 'color': 'rgba(0,0,0,0)'},
+                        'hoverinfo': 'text',
+                        'text': f"<b>{line['genome_1']} - {line['chr_1']}</b>: {line['start_1']} to {line['end_1']}<br>"
+                                f"<b>{line['genome_2']} - {line['chr_2']}</b>: {line['start_2']} to {line['end_2']}",
+                        'showlegend': False
+                    }
+                    shape_hover_traces.append(hover_trace)
+
+                    continue
                 else:
                     raise ValueError("Invalid position_mode. Must be 'exact' or 'middle'.")
 
                 # Extract y-offsets based on the current genome positions
-                y1 = genome_y_positions[line["genome_1"]]
-                y2 = genome_y_positions[line["genome_2"]]
+                y1, y2 = genome_y_positions[line["genome_1"]], genome_y_positions[line["genome_2"]]
 
                 # Adjust y positions to avoid overlap; height is added to ensure the curve reaches the right height
                 y1, y2 = (y1 + height, y2) if y1 < y2 else (y1, y2 + height)
@@ -286,32 +398,33 @@ def create_bezier_synteny_lines(synteny_lines, selected_genomes, selected_chromo
                 bezier_x, bezier_y = bezier_curve(start_1_position, y1, start_1_position, (y1 + y2) / 2, start_2_position, (y1 + y2) / 2, start_2_position, y2)
 
                 # Create gradient colors between start and end
-                colors = get_gradient_colors(line["color_1"], line["color_2"], num_segments)
+                color_1 = tab_data["genomes"][line["genome_1"]]["chromosomes"][line["chr_1"]]["color"]
+                color_2 = tab_data["genomes"][line["genome_2"]]["chromosomes"][line["chr_2"]]["color"]
+                colors = get_gradient_colors(color_1, color_2, num_segments)
 
                 # Split the Bezier curve into segments for gradient coloring
                 segment_length = len(bezier_x) // num_segments
                 for j in range(num_segments):
-                    # Segment the curve for gradient effect
                     segment_x = bezier_x[j * segment_length:(j + 1) * segment_length + 1]
                     segment_y = bezier_y[j * segment_length:(j + 1) * segment_length + 1]
                     legend_group = f"{line['genome_1']}_{line['chr_1']}"  # Use the same legend group as chromosomes
 
-                    # Create scatter trace for each segment
                     trace = go.Scatter(
                         x=segment_x,
                         y=segment_y,
                         mode='lines',
-                        opacity=0.8,
-                        line=dict(color=colors[j], width=1),
+                        opacity=opacity,
+                        line=dict(color=colors[j], width=width),
                         showlegend=False,
                         hoverinfo='text',
                         text=f"<b>{line['genome_1']} - {line['chr_1']}</b>: {line['start_1']} to {line['end_1']}<br>"
                              f"<b>{line['genome_2']} - {line['chr_2']}</b>: {line['start_2']} to {line['end_2']}",
-                        legendgroup=legend_group
+                        legendgroup=legend_group,
+                        meta='synteny_lines'
                     )
                     line_traces.append(trace)
 
-    return line_traces
+    return line_traces, shape_traces, shape_hover_traces
 
 
 
@@ -395,6 +508,15 @@ def bezier_curve(x1, y1, x2, y2, x3, y3, x4, y4, num_points=100):
     x = (1-t)**3 * x1 + 3*(1-t)**2 * t * x2 + 3*(1-t) * t**2 * x3 + t**3 * x4
     y = (1-t)**3 * y1 + 3*(1-t)**2 * t * y2 + 3*(1-t) * t**2 * y3 + t**3 * y4
     return x, y
+
+
+def bezier_ribbon(y1t, y2b, x1s, x1e, x2s, x2e, width, num_points=100):
+    # Calculate top and bottom curves by adjusting y coordinates for width
+    y3 = (y1t + y2b)/2
+    top_curve = bezier_curve(x1s, y1t, x1s, y3, x2s, y3, x2s, y2b, num_points)
+    bottom_curve = bezier_curve(x1e, y1t, x1e, y3 + width, x2e, y3 + width, x2e, y2b, num_points)
+    return top_curve, bottom_curve
+
 
 # Function to find the color of a chromosome [SYNTENY CURVES]
 def get_chromosome_color(genomes, genome, chromosome_name):

@@ -16,4 +16,4 @@ layout = html.Div([
         ), width=3, className="ps-2 me-2"),
         dbc.Col(generate_dbc_button('Add Tab', 'add-app-tab'), width=2, className="ps-2 me-2 mt-1")
     ]),
-], className="mt-3 px-5")
+], id='home-mode', className="pt-3 px-5")

@@ -1,8 +1,9 @@
 import pandas as pd
+import json
 from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
 from src.params.styles import *
-from src.params.variables import tooltip
+from src.params.defaults import tooltip
 
 
 COL_PROPS={'renamable':True, 'editable':True, 'hideable':True, 'selectable':True, 'clearable':True, 'deletable':True}
@@ -25,6 +26,10 @@ def generate_color_options(value_list):
 
 def generate_html_label(text, cname='d-block', style=css_lab):
     return html.Label(children=str(text), className=cname, style=style)
+
+
+def generate_dcc_input_scroll(text, cname=''):
+    return dcc.Input(value=str(text), className=cname, type='text', disabled=True, persistence=True, persistence_type='session')
 
 
 def generate_dbc_button(text, identifier, n_clicks=0, size="sm", outline=True, color="secondary", cname="align-top w-50 h34", style=None, disabled=False):
@@ -134,6 +139,35 @@ def get_triggered_info(ctx):
         else:
             info[1] = tmp.split('.')[0]
     return info
+
+
+def get_triggered_dict(ctx):
+    info = {}
+    try:
+        item = ctx[0]
+        json_part, property = item['prop_id'].split('.')
+        try:
+            json_data = json.loads(json_part)
+            info.update(json_data)
+        except:
+            info['id'] = json_part
+        info['property'] = property
+        info['value'] = item.get('value')
+    finally:
+        return info
+
+
+def get_triggered_index(items, key='tab', value=None):
+    """
+    Returns the index of the dictionary in the list where `key` matches the `value`.
+    If no match is found, returns None.
+    
+    :param items: List of dictionaries to search
+    :param key: The dictionary key to match (default is 'tab')
+    :param value: The value to match for the specified key
+    :return: Index of the matching dictionary or None if not found
+    """
+    return next((i for i, item in enumerate(items) if item.get(key) == value), None)
 
 
 def find_component_ids(component):

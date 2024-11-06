@@ -34,7 +34,7 @@
   border-color: transparent var(--col4) var(--col4) transparent;
 }
 
-.container-fluid {padding-left: 0px !important;}
+/*.container-fluid {padding-left: 0px !important;}*/
 
 body {
   overflow-y: hidden;
@@ -222,6 +222,11 @@ body {
     border: 3px solid var(--col3);
 }*/
 
+
+.form-check-input:checked {
+  background-color: var(--col3);
+  border-color: var(--col4);
+}
 
 .checkbox-label {
   position: relative;
@@ -429,45 +434,48 @@ input {
 
 /* ---------------------------------------------------------- */
 
-/* Custom styles for dcc.Tabs */
-.index-tabs {
-    height: 30px !important;
-    padding: 0px 36px;
-    margin-top: 4px;
-    border-bottom: 1px solid rgb(0, 140, 186);
-}
-
+/* Custom styles for dbc.Tabs */
 .index-container {
-    width: 95%;
+  padding-left: 37px;
+  padding-right: 37px;
+  padding-top: 0.25em;
 }
 
-.index-tab {
-    color: var(--col5);
-    display: flex !important;
-    align-items: center !important;
-    padding: 0px !important;
-    justify-content: center;
-    background-color: var(--col2) !important;
-    border: 1px solid var(--col2) !important;
-    border-bottom: 1px solid rgb(0, 140, 186) !important;
-    border-right: 1px solid var(--col5) !important;
-    height: 30px !important;
-    width: 20%;
-}
-.tab--selected {
-    color: var(--col4) !important;
-    font-weight: bold;
-    display: flex !important;
-    align-items: center;
-    padding: 0px;
-    height: 30px;
-    background-color: white !important;
-    border: 1px solid rgb(0, 140, 186) !important;
-    border-bottom: 2px solid white !important;
-
+.tab-content {
+  background-color: white;
+  margin-bottom: 0;
 }
 
+.nav-item {
+  text-align: center;
+}
 
+.tab-fixed {
+  min-width: 80px;
+  max-width: 231px;
+}
+
+.nav-link {
+  color: var(--col2);
+  height: 36px;
+  padding-top: 5px;
+}
+.tab-fixed .nav-link {
+  font-weight: 600;
+  border-left: 1px solid #dee2e6 !important;
+}
+.nav-link:hover {
+  color: var(--col3);
+  border: 1px solid #dee2e6 !important;
+  border-bottom: 0px !important;
+  text-shadow: 0 0 0 3px var(--col3);
+}
+
+#tabs .nav-link.active {
+  color: var(--col4);
+  border: 1px solid var(--col3) !important;
+  border-bottom: 0px !important;
+}
 
 /* --- Analysis options --- */
 
@@ -476,6 +484,9 @@ input {
 }
 
 .shift-up {transform: translateY(-1.2em);}
+
+.shift-right-1 {position: relative; left: 1em;}
+.shift-right-2 {position: relative; left: 2em;}
 
 .item {background-color: transparent !important;}
 

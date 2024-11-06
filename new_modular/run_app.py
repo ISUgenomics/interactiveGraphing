@@ -2,10 +2,13 @@ from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from src.pages import index, about
 from src.callbacks import register_callbacks
+from src.apps import register_app_callbacks
 from src.params.generic import PARAMS                                          # DEBUG ############
+from src.params.styles import *
 from src.layout.storage import storage, void, identifiers
-from src.layout.options import left_panel
+from src.pages import index, about
 from src.layout.graphing import right_panel
+#from src.layout.database import init_db
 from src.functions.widgets import find_component_ids                           # DEBUG ############
 
 external_stylesheets = [
@@ -44,9 +47,13 @@ app.index_string = '''
             {%scripts%}
             {%renderer%}
             <div class="footer row m-0">
-                <div class="d-inline w-25">Copyright 2024 GIF@ISU</div>
+                <div class="d-inline w-25">Copyright 2024 Iowa State University</div>
                 <div class="d-inline w-50">© <b>Interactive Graphing</b></div>
-                <div class="d-inline w-25">Development: <a style="text-decoration: none;" href="https://github.com/aedawid" target="_blank">abadacz</a></div></div>
+                <div class="d-inline w-25">Development: 
+                    <a style="text-decoration: none;" href="https://github.com/aedawid" target="_blank">abadacz</a>
+                    @<a style="text-decoration: none;" href="https://www.biotech.iastate.edu/gif/" target="_blank">GIF.iastate</a>
+                </div>
+            </div>
         </footer>
     </body>
 </html>
@@ -55,19 +62,25 @@ app.index_string = '''
 app.layout = dbc.Container([
     dcc.Location(id='location', refresh=False),
     void, identifiers, storage,
-    dbc.Row([
-        dbc.Col(dcc.Tabs(id="tabs", value='tab-home', parent_className='index-tabs', className='index-container',
-                    children=[
-                        dcc.Tab(label='HOME', value='tab-home', className='index-tab'),
-                        dcc.Tab(label='ABOUT', value='tab-about', className='index-tab'),]), 
-                width=12, className="pe-0"),
-    ], style={"backgroundColor":"rgb(214, 242, 250)"}),
-    html.Div(id='info-mode'),
-    html.Div(id='app-mode', children=[
-        left_panel,
-        right_panel
-    ], style={'width':'100%', 'height':'100%', 'overflowY':'hidden', "display": "flex"}, hidden=True)
-], fluid=True)
+    html.Div([
+        html.Div([
+            dbc.Tabs(id="tabs", active_tab='tab-home', className='index-container',     #parent_className='index-tabs'
+                children=[
+                    dbc.Tab(index.layout, label='HOME', id='tab-home', tab_id='tab-home', tab_class_name='tab-fixed',),
+                    dbc.Tab(about.layout, label='ABOUT', id='tab-about', tab_id='tab-about', tab_class_name='tab-fixed'),
+                ],
+            persistence=True, persistence_type="session"),
+        ], id="tabs-header", style={"backgroundColor": 'rgb(214, 242, 250)'}),
+
+        html.Div(id='app-mode', children=[
+            html.Div(id='left-panelDiv', children=[
+                html.Button('≡', id='options', n_clicks=0, style=css_btn),
+                html.Div(id='optionsDiv', children=[], style={'marginRight': '1px', 'width': '100%', 'display':'none'})
+            ], style=css_lpd),
+            right_panel
+        ], style={'width':'100%', 'height':'100%', 'overflowY':'hidden'}, className='d-none')
+    ], id="visible-app", style={'height': 'calc(100vh - 45px)'}),
+], fluid=True, class_name="px-0")
 
 
 
@@ -87,9 +100,15 @@ print("The following keys from PARAMS are missing in the all_ids list:", missing
 
 
 
-# Import all callbacks
-register_callbacks(app)
-
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8085)
+
+    # Initialize database for dynamic options management
+#    init_db()
+
+    # Import all callbacks
+    register_callbacks(app)
+    register_app_callbacks(app)
+
+    # Launch the app GUI on a local server
+    app.run(debug=True, port=8085, use_reloader=False)

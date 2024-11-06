@@ -21,4 +21,4 @@ layout = html.Div([
     html.H4("""
         Happy Analyzing!
     """)
-], className="mt-3 px-5")
+], id='info-mode', className="pt-3 px-5")

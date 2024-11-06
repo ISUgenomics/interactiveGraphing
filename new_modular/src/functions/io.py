@@ -4,26 +4,51 @@ import base64
 import json
 import pandas as pd
 from dash import dcc, no_update
+from src.params.defaults import default_headers
 
 # Generic functions
+
+# Function to check if the first row is likely a header
+def is_first_row_header(df):
+    return df.iloc[0].apply(lambda x: isinstance(x, str)).all()     # if the first row contains non-numeric values
 
 # Create a dataframe from user-uploaded file of a specific format 
 def decode_base64(filename, string):
     try:
         decoded = base64.b64decode(string)
+        format = os.path.splitext(filename)[1].upper()
+
         if filename.endswith('.csv'):
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-        elif filename.endswith('.tsv'):
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t')
-        elif filename.endswith('.xls') or filename.endswith('.xlsx'):
-            df = pd.read_excel(io.BytesIO(decoded))
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=None)
+        elif filename.endswith(('.tsv', '.paf')):
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', header=None)
+        elif filename.endswith(('.xls', '.xlsx')):
+            df = pd.read_excel(io.BytesIO(decoded), header=None)
         elif filename.endswith('.json'):
             decoded = base64.b64decode(string.encode('ascii')).decode('ascii')
-            df = pd.read_json(decoded, orient ='index')
+            df = pd.read_json(decoded, orient='index')
+
+        # Check if the first row is a header
+        if is_first_row_header(df):
+            df.columns = df.iloc[0]                             # use the first row as header
+            df = df[1:].reset_index(drop=True)                  # remove the header row from data
+        else:
+            num_columns = len(df.columns)
+            if not format or format not in default_headers:     # generate generic header
+                header = [f'column_{i+1}' for i in range(len(df.columns))]
+            else:                                               # apply default headers if format is known
+                header = default_headers[format]
+                if num_columns > len(header):
+                    extra_headers = [f'extra_col_{i}' for i in range(len(header) + 1, num_columns + 1)]
+                    header = header + extra_headers
+            df.columns = header
+        
+        df[df.select_dtypes(include=['number']).columns] = df.select_dtypes(include=['number']).apply(pd.to_numeric)
+
         return df
-    except:
-        print(f"File {filename} can NOT be decoded!")
-        pass
+    except Exception as e:
+        print(f"File {filename} can NOT be decoded! \nError: {e}")
+        return None
 
 
 # [PART 1/2 Dataframe save/download] Manage different file formats
