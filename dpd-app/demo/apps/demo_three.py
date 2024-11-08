@@ -58,7 +58,7 @@ a2.layout = html.Div([
                    options=[{'label':i, 'value':j} for i, j in [("O2", "Oxygen"),
                                                                 ("N2", "Nitrogen"),
                                                                 ("CO2", "Carbon Dioxide")]],
-                   value="Oxygen"),
+                   value="Oxygen"), #persistence=True, persistence_type='session'),
     html.Div(id="output-one")
     ])
 
