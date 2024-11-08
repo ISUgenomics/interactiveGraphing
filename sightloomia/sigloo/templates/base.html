@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+   {% load plotly_dash%}
+   {% load static%}
+   {% load bootstrap4%}
+   {% bootstrap_css%}
+   {% bootstrap_javascript jquery="full"%}
+
+   {% block dash_metas %}{% endblock %}
+   {% block extra_header%}{% endblock%}
+   {% block app_header_css%}
+   <link rel="icon" href="{% static 'assets/favicon.png' %}" type="image/x-icon"></link>
+   <link rel="stylesheet" type="text/css" href="{% static 'assets/custom.css' %}?v=2">
+   {% endblock%}
+   {% plotly_header%}
+   <title>Interactive Graphing for Bioinformatics - {% block title%}{% endblock%}</title>
+   {% block dash_css %}{% endblock %}
+ </head>
+ 
+ <body>
+   <header>
+     <nav class="navbar navbar-expand-lg menubar" >
+        <div class="navbar-nav">
+    	    <a class="navbar-brand" href="#"><img class="dpd-logo" src="{%static "assets/logo.svg"%}" alt="Logo"/></a>
+            <a class="navbar-brand" href="{% url 'home' %}">Home</a>
+            <a class="nav-item nav-link btn btn-lg" href="{% url 'about' %}">About</a>
+
+            <!-- Dynamic tabs -->
+            <div id="dynamic-tabs" class="navbar-nav">
+                    {% for tab in tabs %}
+                        <a class="nav-item nav-link btn btn-lg {% if tab == active_tab %}active{% endif %}" 
+                           href="{% url 'app_instance' tab %}">
+                            {{ tab }}
+                        </a>
+                    {% endfor %}
+            </div>
+        </div>
+     </nav>
+   </header>
+   <main>
+     {% block main_top%}{% endblock%}
+     <div class="container">{% block content%}{% endblock%}</div>
+   </main>
+   
+   <footer>
+     <div class="footer row m-0">
+       <div class="d-inline w-25">Copyright 2024 Iowa State University</div>
+       <div class="d-inline w-50">© <b>Sightloomia</b></div>
+       <div class="d-inline w-25">Development: 
+         <a style="text-decoration: none;" href="https://github.com/aedawid" target="_blank">abadacz</a>
+         @<a style="text-decoration: none;" href="https://www.biotech.iastate.edu/gif/"" target="_blank">GIF.iastate</a>
+       </div>
+     </div>
+     {% block footer %}{% endblock %}
+   </footer>
+   
+   <!-- Custom JavaScript and Dash configuration scripts -->   
+   <script src="{% static 'assets/custom.js' %}"></script>
+
+ </body>
+ {% block post_body%}{% endblock%}
+ {% plotly_footer%}
+</html>
