@@ -109,7 +109,13 @@ def add_new_tab(request, template_name):
     original_app, created = StatelessApp.objects.get_or_create(app_name=stateless_app_name)
     if original_app is None:
         return HttpResponse("Failed to create or retrieve StatelessApp instance.", status=500)
-    dash_app, created = DashApp.objects.get_or_create(stateless_app=original_app, instance_name=unique_slug, slug=unique_slug)
+    if stateless_app_name == 'DemoThree':
+        dash_app, created = DashApp.objects.get_or_create(stateless_app=original_app, instance_name=unique_slug, slug=unique_slug, 
+        save_on_change=True, base_state='{"dropdown-one":{"value":"Nitrogen"}}')
+#        dash_app.base_state = '{}'
+#        dash_app.save()
+    else:
+        dash_app, created = DashApp.objects.get_or_create(stateless_app=original_app, instance_name=unique_slug, slug=unique_slug, save_on_change=True)
     if dash_app is None:
         return HttpResponse("Failed to create or retrieve DashApp instance.", status=500)
 
