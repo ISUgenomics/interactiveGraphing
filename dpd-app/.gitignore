@@ -1,0 +1,74 @@
+# Python-related files
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+*.pdb
+*.pyo
+*.pyd
+*.py[cod]
+*$py.class
+
+# Byte-compiled / optimized / DLL files
+*.so
+*.dll
+*.dylib
+
+# Django-related files
+
+# Django migration files
+*/migrations/*
+
+# Ignore db.sqlite3 or any other SQLite database files
+*.sqlite3
+
+# Ignore Postgres database dumps
+*.dump
+
+# Django session data
+django_session/
+
+# Django cache
+cache/
+
+# Secret keys and settings (be careful with sensitive data)
+.env
+.env.local
+*.env
+
+
+staticfiles/
+
+# Ignore Django's media folder (if used)
+media/
+
+# Ignore all local static files generated
+/static/
+
+# If you're using coverage reports
+htmlcov/
+*.cover
+.coverage
+*.log
+coverage.xml
+*.lcov
+
+# Ignore virtual environment directories
+venv/
+env/
+ENV/
+venv.bak/
+
+# Ignore editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.DS_Store
+Thumbs.db
+
+# Ignore pytest caches
+.pytest_cache/
