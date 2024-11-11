@@ -5,6 +5,8 @@
   --col4: #006699;  /*dark teal, accordion button on-hover, dark font*/
   --col5: #f9f9f9;  /*light gray, accordion button static*/
   --col6: rgb(211, 211, 211);   /*gray, tables border color*/
+  --col7: #dee2e6;
+
   
   --fss: 12px;
   --fsm: 14px;
@@ -53,7 +55,52 @@ body {
 
 .menubar {
   background-color: var(--col1) !important;
+  height: 40px !important;
+  padding-top: 10px !important;
+  border-bottom: 1px solid var(--col7);
 }
+
+.navbar-brand {
+  padding: 0;
+}
+
+.tab-fixed {
+  min-width: 80px;
+  max-width: 231px;
+  font-weight: 600;
+}
+
+.nav-link {
+  color: var(--col2);
+  height: 36px;
+  padding-top: 5px;
+  text-align: center;
+}
+
+.navbar-nav {
+  margin-bottom: -8px !important;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--col3);
+  background-color: var(--col1);
+  border: 1px solid #dee2e6 !important;
+  border-radius: 5px 5px 0 0;
+  text-shadow: 0 0 0 3px var(--col3);
+}
+
+.navbar-nav .nav-link.active {
+  color: var(--col4);
+  background-color: white;
+  border: 1px solid var(--col3) !important;
+  border-bottom: 2px solid white !important;
+  border-radius: 5px 5px 0 0;
+}
+
+.container {
+  padding-top: 1.5em;
+}
+
 
 
 [draggable=true] {
@@ -84,8 +131,8 @@ body {
   color: var(--col5);                               /*light-blue*/
 }
 .accordion-button:not(.collapsed) {             /*--button when expanded--*/
-  background-color: var(--col4);
-  color: var(--col5);
+  background-color: var(--col4) !important;
+  color: var(--col5) !important;
 }
 .accordion-button:not(.collapsed)::after {      /*--button icon when expanded--*/
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='rgb(228, 209, 209)'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
@@ -439,7 +486,7 @@ input {
 /* ---------------------------------------------------------- */
 
 /* Custom styles for dbc.Tabs */
-.index-container {
+/*.index-container {
   padding-left: 37px;
   padding-right: 37px;
   padding-top: 0.25em;
@@ -448,38 +495,9 @@ input {
 .tab-content {
   background-color: white;
   margin-bottom: 0;
-}
+}*/
 
-.nav-item {
-  text-align: center;
-}
 
-.tab-fixed {
-  min-width: 80px;
-  max-width: 231px;
-}
-
-.nav-link {
-  color: var(--col2);
-  height: 36px;
-  padding-top: 5px;
-}
-.tab-fixed .nav-link {
-  font-weight: 600;
-  border-left: 1px solid #dee2e6 !important;
-}
-.nav-link:hover {
-  color: var(--col3);
-  border: 1px solid #dee2e6 !important;
-  border-bottom: 0px !important;
-  text-shadow: 0 0 0 3px var(--col3);
-}
-
-#tabs .nav-link.active {
-  color: var(--col4);
-  border: 1px solid var(--col3) !important;
-  border-bottom: 0px !important;
-}
 
 /* --- Analysis options --- */
 
@@ -499,3 +517,34 @@ input {
 .react-grid-item {width: fit-content !important;}
 
 .react-grid-item > .react-resizable-handle {display: none;}
+
+
+
+
+.css-lpd {
+  display: inline-block;
+  background-color: #D6F2FA;
+  border-right: 1px solid #008CBA;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 95vh;
+  padding: 5px;
+  max-width: 500px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+
+
+.css-rpd {
+  display: inline-block; 
+  background-color:ghostwhite;
+  padding:20px; 
+  overflow-y:auto;
+  overflow-x:hidden; 
+  height:95vh;
+  flex-grow: 1;
+/*  width:0;*/
+}
