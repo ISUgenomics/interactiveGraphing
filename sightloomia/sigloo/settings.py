@@ -153,6 +153,14 @@ STATICFILES_DIRS = [
     BASE_DIR / 'sigloo' / 'static',
     ]
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django_plotly_dash.finders.DashAssetFinder',
+    'django_plotly_dash.finders.DashComponentFinder',
+    'django_plotly_dash.finders.DashAppDirectoryFinder',
+]
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -196,11 +204,13 @@ STATICFILES_FINDERS = [
 # be handled by the Django staticfiles infrastructure
 
 PLOTLY_COMPONENTS = [
-
-    'dash_bootstrap_components',
-    'dpd_components',
     'dpd_static_support',
     'dash_mantine_components',
+    'dash_core_components',
+    'dash_html_components',
+#    'dash_renderer',
+    'dpd_components',
+    'dash_bootstrap_components'
 ]
 
 
