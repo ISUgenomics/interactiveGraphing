@@ -25,7 +25,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 # Load demo plotly apps - this triggers their registration
-from sigloo.apps import demo_one, demo_two, demo_three, demo_four, demo_five, demo_six, demo_seven, demo_eight, demo_nine, demo_ten, demo_eleven
+from sigloo.apps import demo_one, demo_two, demo_three, demo_four, demo_five, demo_six, demo_seven, demo_eight, demo_nine, demo_ten, demo_eleven, synteny
 
 
 from django_plotly_dash.views import add_to_session
