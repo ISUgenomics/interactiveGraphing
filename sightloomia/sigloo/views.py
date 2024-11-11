@@ -27,7 +27,8 @@ DASH_APP_NAME_MAPPING = {
     'demo-eight':'DemoEight',
     'demo-nine':'DemoNine',
     'demo-ten':'DemoTen',
-    'demo-eleven':'DemoEleven'
+    'demo-eleven':'DemoEleven',
+    'synteny':'Synteny'
 }
 
 
@@ -61,24 +62,25 @@ class AppInstanceTemplateView(TemplateView):
 
 
 def stateless_app_loader(template_name):
-    print(f"Attempting to load app with name: '{template_name}'")  		########## Debug
+    print(f"Attempting to load app with name: {template_name}")  		########## Debug
     stateless_app_name = DASH_APP_NAME_MAPPING.get(template_name)
+    print(f'Key found: {stateless_app_name}')
     if not stateless_app_name:
-        raise ImportError(f"No Dash app registered for template '{template_name}'")
+        raise ImportError(f"No Dash app registered for template {template_name}")
 
     # Retrieve or create the corresponding `StatelessApp` entry
     try:
         stateless_app, created = StatelessApp.objects.get_or_create(app_name=stateless_app_name)
         if created:
-            print(f"Created new StatelessApp for '{stateless_app_name}'")
+            print(f"Created new StatelessApp for {stateless_app_name}")
     except StatelessApp.DoesNotExist:
-        raise ImportError(f"No StatelessApp found for name '{stateless_app_name}'")
+        raise ImportError(f"No StatelessApp found for name {stateless_app_name}")
 
     # Dynamically load the Dash app instance using the app's registered module path
     try:
-        return import_string(f"demo.apps.{stateless_app_name}")
+        return import_string(f"sigloo.apps.{stateless_app_name}")
     except ImportError:
-        raise ImportError(f"Module 'demo.apps' does not define an app named '{stateless_app_name}'")
+        raise ImportError(f"Module 'sigloo.apps' does not define an app named {stateless_app_name}")
 
 
 def add_new_tab(request, template_name):
