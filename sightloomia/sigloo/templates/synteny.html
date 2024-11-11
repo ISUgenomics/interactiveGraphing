@@ -1,0 +1,37 @@
+{%extends "base.html"%}
+{%load plotly_dash%}
+
+{%block title%}Demo One - Simple Embedding{%endblock%}
+
+{%block content%}
+
+<div style="display: flex; flex-direction: column; height: calc(100vh - 100px);">
+
+  <!-- DATA EXPLORATION APP -->
+  <div>
+      <div class="accordion" id="accordionExample">
+          <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      EDIT INPUT DATA
+                  </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                      <p>Explore and edit data.</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- OPTIONS & GRAPHING APP -->
+  <div style="flex-grow: 1; padding: 10px; max-height: calc(100vh - 300px);">
+      <div class="{% plotly_class name=app_name %}" style="width: 100%; height: 100%;">
+          {% plotly_app slug=tab_name ratio=1 %}
+      </div>
+  </div>
+
+</div>
+
+{%endblock%}
