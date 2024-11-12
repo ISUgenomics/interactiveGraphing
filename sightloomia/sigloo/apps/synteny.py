@@ -13,20 +13,26 @@ from sigloo.apps.src.functions.widgets import find_component_ids
 from sigloo.apps.src.callbacks import register_callbacks
 
 
-app = DjangoDash('Synteny', external_stylesheets=["/static/assets/custom.css"], external_scripts = [{'src': '/static/assets/custom.js'}])
+app_synteny = DjangoDash('Synteny', add_bootstrap_links=True, 
+                         external_stylesheets=[dbc.themes.BOOTSTRAP, "/static/assets/custom.css"], 
+                         external_scripts = [{'src': '/static/assets/custom.js'}]
+                        )
 
-app.layout = dbc.Container([
-    dcc.Location(id='location', refresh=False),
-    void, identifiers, storage,
-    html.Div([
-        html.Div(id='app-mode', children=[
-            html.Div(id='left-panelDiv', children=[
-                html.Button('≡', id='options', n_clicks=0, style=css_btn),
-                html.Div(id='optionsDiv', children=[], style={'marginRight': '1px', 'width': '100%', 'display':'none'})
-            ], className='css-lpd'),
-            right_panel
-        ], style={'width':'100%', 'height':'100%', 'overflowY':'hidden'}, className='d-none')], id="visible-app", style={'height': 'calc(100vh - 45px)'}),
-], fluid=True, class_name="px-0")
+app_synteny.layout = dbc.Container([
+#    dcc.Location(id='location', refresh=False),
+#    void, identifiers, storage,
 
-register_callbacks(app)
+        html.Div(id='left-panelDivX', children=[
+            html.Button('≡', id='options-synteny', n_clicks=0, style=css_btn),
+            html.Div(id='optionsDivX', children=[], style={'marginRight': '1px', 'width': '100%', 'display':'none'})
+        ], className='css-lpd'),
+
+        dbc.Accordion([
+            dbc.AccordionItem(html.Div(id='graph-panelDiv'), title="DISPLAY INTERACTIVE GRAPHS", item_id="item-12"),
+            dbc.AccordionItem(html.Div(id='lower-panelDiv'), title="EXTRACT OUTPUT DATA", item_id="item-13"),
+        ], id="accordion", className='data-graph', always_open=True, flush=False, start_collapsed=True),
+
+], id='app-bodyDiv', fluid=True, class_name="px-0")       # style={'width':'100%', 'height':'100%', 'overflowY':'hidden'}
+
+#register_callbacks(app_synteny)
 
