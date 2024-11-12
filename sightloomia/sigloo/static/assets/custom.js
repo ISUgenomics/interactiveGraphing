@@ -1,28 +1,29 @@
-//document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     // Get the current path, ignoring any trailing slash
-//    const currentPath = window.location.pathname.replace(/\/$/, "");
-//    console.log("Current Path:", currentPath); // Debugging line
+    const currentPath = window.location.pathname.replace(/\/$/, "");
+    console.log("Current Path:", currentPath); // Debugging line
 
     // Select all navigation links in the menu
-//    const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+    const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
 
-//    navLinks.forEach(link => {
+    navLinks.forEach(link => {
         // Get the link's href path, ignoring any trailing slash
-//        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-//        console.log("Link Path:", linkPath); // Debugging line
+        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+        console.log("Link Path:", linkPath); // Debugging line
 
         // Check if the link's path matches the current path
-//        if (linkPath === currentPath) {
-//            console.log("Active link found:", link); // Debugging line
+        if (linkPath === currentPath) {
+            console.log("Active link found:", link); // Debugging line
 
             // Remove 'active' from any previously active link to ensure only one is highlighted
-//            navLinks.forEach(navLink => navLink.classList.remove("active"));
+            navLinks.forEach(navLink => navLink.classList.remove("active"));
 
             // Add 'active' to the matching link
-//            link.classList.add("active");
-//        }
-//    });
-//});
+            link.classList.add("active");
+        }
+    });
+});
+
 
 
 
