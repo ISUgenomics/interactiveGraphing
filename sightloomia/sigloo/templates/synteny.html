@@ -5,18 +5,18 @@
 
 {%block content%}
 
-<div style="display: flex; flex-direction: column; height: calc(100vh - 100px);">
+<div class="visible-app">
 
   <!-- DATA EXPLORATION APP -->
-  <div>
-      <div class="accordion" id="accordionExample">
+  <div class="data-editor">
+      <div class="accordion" id="data-editor">
           <div class="accordion-item">
               <h2 class="accordion-header" id="headingOne">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                       EDIT INPUT DATA
                   </button>
               </h2>
-              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+              <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                   <div class="accordion-body">
                       <p>Explore and edit data.</p>
                   </div>
@@ -26,7 +26,7 @@
   </div>
 
   <!-- OPTIONS & GRAPHING APP -->
-  <div style="flex-grow: 1; padding: 10px; max-height: calc(100vh - 300px);">
+  <div style="flex-grow: 1; padding: 0; max-height: calc(100vh - 300px);">
       <div class="{% plotly_class name=app_name %}" style="width: 100%; height: 100%;">
           {% plotly_app slug=tab_name ratio=1 %}
       </div>
