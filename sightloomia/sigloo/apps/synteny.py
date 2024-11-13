@@ -22,17 +22,29 @@ app_synteny.layout = dbc.Container([
 #    dcc.Location(id='location', refresh=False),
 #    void, identifiers, storage,
 
-        html.Div(id='left-panelDivX', children=[
-            html.Button('≡', id='options-synteny', n_clicks=0, style=css_btn),
-            html.Div(id='optionsDivX', children=[], style={'marginRight': '1px', 'width': '100%', 'display':'none'})
+        html.Div(id='left-panelDiv', children=[
+            html.Button('≡', id='options', n_clicks=0, style=css_btn),
+            html.Div(id='optionsDiv', children=[], style={'marginRight': '1px', 'width': '100%', 'display':'none'})
         ], className='css-lpd'),
 
         dbc.Accordion([
             dbc.AccordionItem(html.Div(id='graph-panelDiv'), title="DISPLAY INTERACTIVE GRAPHS", item_id="item-12"),
             dbc.AccordionItem(html.Div(id='lower-panelDiv'), title="EXTRACT OUTPUT DATA", item_id="item-13"),
-        ], id="accordion", className='data-graph', always_open=True, flush=False, start_collapsed=True),
+        ], id="data-graph", className='data-graph', always_open=True, flush=False, start_collapsed=True),
 
 ], id='app-bodyDiv', fluid=True, class_name="px-0")       # style={'width':'100%', 'height':'100%', 'overflowY':'hidden'}
 
 #register_callbacks(app_synteny)
 
+app_synteny.clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks > 0) {
+            window.dash_clientside.clientside.toggleSidebar(n_clicks);
+        }
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output("options", "n_clicks"),
+    Input("options", "n_clicks")
+)
