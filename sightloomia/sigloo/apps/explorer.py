@@ -1,8 +1,20 @@
-import importlib
-from dash import html, dcc
+from django_plotly_dash import DjangoDash
+from django_plotly_dash.consumers import send_to_pipe_channel
+
+from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-from sigloo.apps.src.params.styles import *
+from dash.dependencies import Input, Output, State
+
+from sigloo.apps.src.layout.storage import storage, void, identifiers
 from sigloo.apps.src.functions.widgets import generate_pop_up_modal
+
+
+app_name = 'explorer'
+
+app_explorer = DjangoDash(app_name.capitalize(), add_bootstrap_links=True, 
+                         external_stylesheets=[dbc.themes.BOOTSTRAP, "/static/assets/custom.css"], 
+                         external_scripts = [{'src': '/static/assets/custom.js'}]
+                        )
 
 # MODAL BODY component
 m_body = html.Div([
@@ -40,21 +52,5 @@ data_inputs = html.Div([
     generate_pop_up_modal("modal-save-df", "btn-save-df", "Save", m_body, "Save DataFrame to your local file system", "lg")
 ], id='upper-panelDiv', className="resize-vertical", style={'minHeight':'fit-content', 'maxHeight':'100vh'}) #, 'height':'fit-content'
 
-# DISPLAY INTERACTIVE SECTION
-graph_analysis = html.Div(id='graph-panelDiv')
 
-# EXTRACT OUTPUT DATA SECTION
-data_outputs = html.Div(id='lower-panelDiv')
-
-#--------------------------------#
-
-# APP-BODY Components assembly
-right_panel = html.Div([
-  html.Div([
-    dbc.Accordion([
-      dbc.AccordionItem(data_inputs, title="EDIT INPUT DATA", item_id="item-11", ),
-      dbc.AccordionItem(graph_analysis , title="DISPLAY INTERACTIVE GRAPHS", item_id="item-12", ),
-      dbc.AccordionItem(data_outputs, title="EXTRACT OUTPUT DATA", item_id="item-13", ),
-    ], id="accordion2", start_collapsed=True, always_open=True, flush=False), 
-  ], id='app-bodyDiv')
-], id='right-panelDiv', className='css-rpd')
+app_explorer.layout = html.Div(children = data_inputs, id='right-panelDiv', className='css-rpd', style={'maxHeight':'100px'})
