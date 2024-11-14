@@ -1,4 +1,5 @@
 // SECTION 1: General JS function, applicable to all apps; added initially on load to set listeners and observers
+const optionsWidth = 350;
 
 ////// --- django tabs management
 // Django app framework: manage all tabs and mark currently active tab
@@ -31,6 +32,7 @@ window.dash_clientside.clientside = {
         const leftPanelDiv = document.getElementById('left-panelDiv');
         const optionsDiv = document.getElementById('optionsDiv');
         const dataGraph = document.getElementById('data-graph');
+        const optionsBtn = document.getElementById('options-btn');
 
         // Check if elements exist
         if (!leftPanelDiv || !optionsDiv) {
@@ -39,14 +41,21 @@ window.dash_clientside.clientside = {
         }
 
         // Toggle expansion state based on current width
-        const isExpanded = leftPanelDiv.style.width === '300px';
-        leftPanelDiv.style.width = isExpanded ? '37px' : '300px';
+        const isExpanded = leftPanelDiv.style.width === `${optionsWidth}px`;
+        
+        leftPanelDiv.style.width = isExpanded ? '37px' : `${optionsWidth}px`;
         optionsDiv.style.display = isExpanded ? 'none' : 'block';
 
-        const leftPanelWidth = isExpanded ? 37 : 300;
+        const leftPanelWidth = isExpanded ? 37 : optionsWidth;
         const availableWidth = window.innerWidth - leftPanelWidth - 28;
         dataGraph.style.width = `${availableWidth}px`;
         dataGraph.style.left = `${leftPanelWidth}px`;
+        const btnBG = isExpanded ? "#008CBA" : "#D6F2FA";
+        const btnColor = isExpanded ? "white" : "#90B6C1";
+        const btnText = isExpanded ? "≡" : "✕";
+        optionsBtn.style.backgroundColor = btnBG;
+        optionsBtn.style.color = btnColor; 
+        optionsBtn.innerText = btnText;
 
         // Send a message to the main document with the updated width
         window.parent.postMessage({ action: 'updateDataGraph', availableWidth, leftPanelWidth }, '*');
@@ -62,7 +71,7 @@ function handleResize() {
 
     if (!leftPanelDiv || !dataGraph) return;
 
-    const leftPanelWidth = leftPanelDiv.style.width === '300px' ? 300 : 37;
+    const leftPanelWidth = leftPanelDiv.style.width === `${optionsWidth}px` ? optionsWidth : 37;
     const availableWidth = window.innerWidth - leftPanelWidth - 28;
 
     dataGraph.style.width = `${availableWidth}px`;
@@ -80,9 +89,12 @@ window.addEventListener('message', (event) => {
     // Check for specific message action
     if (event.data && event.data.action === 'updateDataGraph') {
         const dataEditor = document.getElementById('data-editor-parent');
+        const fixedTabs = document.getElementsByClassName('nav-item tab-fixed');
         if (dataEditor) {
             dataEditor.style.width = `${event.data.availableWidth}px`;
             dataEditor.style.left = `${event.data.leftPanelWidth - 37}px`;
+            const fixedWidth = event.data.leftPanelWidth === optionsWidth ? '148.5px' : '80px';
+            Array.from(fixedTabs).forEach(tab => {tab.style.width = fixedWidth;});
         }
     }
 });
