@@ -206,8 +206,8 @@ STATICFILES_FINDERS = [
 PLOTLY_COMPONENTS = [
     'dpd_static_support',
     'dash_mantine_components',
-    'dash_core_components',
-    'dash_html_components',
+#    'dash_core_components',
+#    'dash_html_components',
 #    'dash_renderer',
     'dpd_components',
     'dash_bootstrap_components'
