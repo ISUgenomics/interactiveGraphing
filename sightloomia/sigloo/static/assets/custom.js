@@ -1,5 +1,13 @@
 // SECTION 1: General JS function, applicable to all apps; added initially on load to set listeners and observers
-const optionsWidth = 350;
+const optionsWidth = 400;
+let currentWindowHeight = window.innerHeight;
+
+// Function to update the current window height
+//function updateWindowHeight() {currentWindowHeight = window.innerHeight; console.log("HERE: ", currentWindowHeight)}
+//window.addEventListener('resize', updateWindowHeight);
+//updateWindowHeight();
+
+
 
 ////// --- django tabs management
 // Django app framework: manage all tabs and mark currently active tab
@@ -66,6 +74,7 @@ window.dash_clientside.clientside = {
 
 // Function to adjust data-graph width dynamically on window resize
 function handleResize() {
+
     const leftPanelDiv = document.getElementById('left-panelDiv');
     const dataGraph = document.getElementById('data-graph');
 
@@ -93,7 +102,7 @@ window.addEventListener('message', (event) => {
         if (dataEditor) {
             dataEditor.style.width = `${event.data.availableWidth}px`;
             dataEditor.style.left = `${event.data.leftPanelWidth - 37}px`;
-            const fixedWidth = event.data.leftPanelWidth === optionsWidth ? '148.5px' : '80px';
+            const fixedWidth = event.data.leftPanelWidth === optionsWidth ? `${(optionsWidth - 53) / 2}px` : '80px';
             Array.from(fixedTabs).forEach(tab => {tab.style.width = fixedWidth;});
         }
     }
@@ -108,7 +117,7 @@ function handleMainResize() {
     if (iframe && dataEditor) {
         const leftPanelWidth = parseInt(dataEditor.style.left, 10) + 37 || 37;
         const availableWidth = window.innerWidth - leftPanelWidth - 28;
-        dataEditor.style.width = `${availableWidth}px`;
+        dataEditor.style.width = `${availableWidth}`;
     }
 }
 // Listen for window resize events in the main document
@@ -135,8 +144,10 @@ window.onload = function() {
             const dataGraph = iframeDoc.querySelector('.data-graph');
             if (dataGraph) {
                 dataGraph.style.top = `${editorHeight}px`;
-            } else {
-                console.log("INFO: data-graph element not found in iframe.");
+            }
+            const leftPanelDiv = iframeDoc.getElementById('left-panelDiv');
+            if (leftPanelDiv){
+                leftPanelDiv.style.height = `${window.innerHeight - 85}px`;
             }
         }
 
@@ -172,3 +183,52 @@ window.onload = function() {
     });
 };
 
+
+/////
+
+document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.draggable-card');
+
+    cards.forEach(card => {
+        // Make each card draggable
+        card.setAttribute('draggable', true);
+
+        card.addEventListener('dragstart', function (e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            e.target.classList.add('dragging');
+        });
+
+        card.addEventListener('dragend', function (e) {
+            e.target.classList.remove('dragging');
+        });
+
+        card.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(e.clientY);
+            const container = card.parentNode;
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const draggedCard = document.getElementById(draggedId);
+
+            if (afterElement == null) {
+                container.appendChild(draggedCard);
+            } else {
+                container.insertBefore(draggedCard, afterElement);
+            }
+        });
+    });
+
+    // Helper function to find where to insert the dragged element
+    function getDragAfterElement(y) {
+        const draggableElements = [...document.querySelectorAll('.draggable-card:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+});
