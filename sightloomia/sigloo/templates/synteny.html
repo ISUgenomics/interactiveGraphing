@@ -17,8 +17,11 @@
                   </button>
               </h2>
               <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                  <div class="accordion-body">
+                  <div class="accordion-body data-explorer">
                       <p>Explore and edit data.</p>
+                      <div class="{% plotly_class name='Explorer' %}">
+                        {% plotly_app name='Explorer' ratio=1 %}
+                      </div>
                   </div>
               </div>
           </div>
@@ -26,7 +29,7 @@
   </div>
 
   <!-- OPTIONS & GRAPHING APP -->
-  <div style="flex-grow: 1; padding: 0; max-height: calc(100vh - 300px);">
+  <div style="flex-grow: 1; padding: 0; max-height: calc(100vh - 85px);">
       <div class="{% plotly_class name=app_name %}" style="width: 100%; height: 100%;">
           {% plotly_app slug=tab_name ratio=1 %}
       </div>
