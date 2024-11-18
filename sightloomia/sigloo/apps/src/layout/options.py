@@ -33,13 +33,16 @@ def create_opts_inputs(tab_name):
 def create_opts_analysis(tab_name):
     variant = tab_name.split('_')[0]                                                   # app type: 'synteny', 'clustergram', etc.
     function_name = f'create_opts_analysis_{variant}'                                  # ensure each app type has such a function defined
+    print("IMPORT MODULE... ", variant)
 
     try:
-        options_module = importlib.import_module(f'src.apps.{variant}.options')        # dynamically load the app-specific options module
+        options_module = importlib.import_module(f'sigloo.apps.src.layout.opts_{variant}')         # dynamically load the app-specific options module
+        print("MODULE: ", options_module)
         func = getattr(options_module, function_name)
         return [html.Div(id={'id': "opts-analysis", 'tab': tab_name}, children=func(tab_name))]
     
     except (ModuleNotFoundError, AttributeError) as e:                                 # module or function doesn't exist
+        print(f"ModuleNotFoundError: {e}")
         return [html.Div(id={'id': "opts-analysis", 'tab': tab_name}, children=html.Div(f"No options available for {variant} analysis."))]
 
 
@@ -245,7 +248,7 @@ def create_opts_graph_custom(tab_name):
     function_name = f'create_opts_graph_{variant}'                                     # ensure each app type has such a function defined
 
     try:
-        options_module = importlib.import_module(f'src.apps.{variant}.options')        # dynamically load the app-specific options module
+        options_module = importlib.import_module(f'sigloo.apps.src.layout.opts_{variant}')         # dynamically load the app-specific options module
         func = getattr(options_module, function_name)
         return [html.Div(id={'id': "opts-analysis", 'tab': tab_name}, children=func(tab_name))]
 
@@ -306,6 +309,7 @@ def create_opts_export_config(tab_name):
 # Final assembly of the Options Panel
 
 def create_left_panel(tab_name):
+    print("LEFT PANEL: ", tab_name)
     return [
         dbc.Accordion([
             dbc.AccordionItem(create_opts_inputs(tab_name), title="1. UPLOAD RAW INPUTS", item_id="item-1"),
