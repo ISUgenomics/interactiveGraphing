@@ -117,7 +117,11 @@ def add_new_tab(request, template_name):
 #        dash_app.base_state = '{}'
 #        dash_app.save()
     else:
-        dash_app, created = DashApp.objects.get_or_create(stateless_app=original_app, instance_name=unique_slug, slug=unique_slug, save_on_change=True)
+        dash_app, created = DashApp.objects.get_or_create(stateless_app=original_app, instance_name=unique_slug, slug=unique_slug, save_on_change=True) #, base_state='{"demo-dropdown":{"value":"MTL"}}'
+        dash_app.populate_values()
+        dash_app.save()
+#        print("BASE: ", dash_app.base_state)
+    print(DashApp.objects.all().values('slug', 'base_state'))
     if dash_app is None:
         return HttpResponse("Failed to create or retrieve DashApp instance.", status=500)
 
