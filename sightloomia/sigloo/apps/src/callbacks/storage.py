@@ -15,14 +15,29 @@ from sigloo.apps.src.functions.widgets import get_triggered_info, generate_html_
 def register_storage_callbacks(app):
 
     # [MANAGE FILES 1/4] The function creates a dict of user-loaded files that can be used for plotting; user-purged inputs are removed from memory
-    @app.callback(Output('user-files-list', 'data'),
+    @app.expanded_callback(Output('user-files-list', 'data'),
                  [Input({'id':'upload-box', 'tab': ALL}, 'filename'), Input({'id':'upload-box', 'tab': ALL}, 'contents'), Input({'id':"download-btn", 'tab': ALL}, 'n_clicks'), Input('captured-name-store', 'data')],
                  [State({'id':"custom-url", 'tab': ALL}, 'value'), State('user-files-list', 'data'), State({'id':'upload-box', 'tab': ALL}, 'id')],
                   prevent_initial_call = True)
-    def create_input_list(files_box, contents_box, download_clicks, removed_input, urls, files, ids):
+    def create_input_list(files_box, contents_box, download_clicks, removed_input, urls, files, ids, **kwargs):
         print('0. update files list triggered')                                                                                #############  DEBUG
         print('0. removed input: ', removed_input)
+        print('KWARGS: ', kwargs.keys(), kwargs.get('session_state'))
+        dash_app = kwargs.get('dash_app')
+        print(dash_app.slug)
+#        dash_app.populate_values()
+#        A = dash_app.current_state()
+#        print(A, '\n', A.get('demo-dropdown'))
+#        dash_app.update_current_state('demo-dropdown', 'value', 'MTL')
+#        dash_app.save()
+#        dash_app.populate_values()
+#        A['demo-dropdown']['value'] = 'MTL'
+#        dash_app.base_state = json.dumps(A)
+#        dash_app.save()
+#        print(dash_app.base_state)        
+        callback_context = kwargs.get('callback_context')
         ctx = callback_context.triggered
+#        print('CONTEXT: ', ctx)
         if ctx:
             tnv = get_triggered_info(ctx)  # [type, name, value]
             print('0. CTX: ', tnv[0], ' ; ', tnv[1])                                                                          #############  DEBUG
